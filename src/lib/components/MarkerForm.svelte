@@ -133,8 +133,6 @@
   };
 
   const handleSubmit = async (event: Event) => {
-    event.preventDefault();
-
     if (!title) {
       error = 'Judul marker tidak boleh kosong';
       return;
@@ -206,7 +204,10 @@
     </div>
   {/if}
 
-  <form on:submit={handleSubmit} class="p-5">
+  <form onsubmit={(e) => {
+    e.preventDefault();
+    handleSubmit(e);
+  }} class="p-5">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div class="space-y-4">
         <div class="form-group">
@@ -265,7 +266,7 @@
               id="city"
               bind:value={city}
               placeholder="Nama kota atau kabupaten"
-              class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-em SLOPEerald-500 dark:bg-gray-700 dark:text-white transition-all duration-200"
+              class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white transition-all duration-200"
             />
           </div>
         </div>
@@ -330,13 +331,13 @@
       <div class="space-y-4">
         <div class="form-group">
           <div class="flex justify-between items-center mb-1">
-            <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="categories-group" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Kategori <span class="text-red-500">*</span>
             </label>
             <button 
               type="button" 
               class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 flex items-center transition-colors duration-200" 
-              on:click={toggleCategoryForm}
+              onclick={toggleCategoryForm}
             >
               {#if isCreatingCategory}
                 <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -353,7 +354,7 @@
           </div>
 
           {#if isCreatingCategory}
-            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 shadow-inner">
+            <div id="categories-group" class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 shadow-inner">
               <div class="mb-3">
                 <label for="newCategory" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Kategori Baru</label>
                 <div class="relative">
@@ -374,7 +375,7 @@
               <button
                 type="button"
                 disabled={submitting}
-                on:click={createCategory}
+                onclick={createCategory}
                 class="w-full flex justify-center items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200"
               >
                 {#if submitting}
@@ -393,7 +394,7 @@
             </div>
           {:else}
             {#if categories.length > 0}
-              <div class="mt-2 space-y-2 max-h-40 overflow-y-auto p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div id="categories-group" class="mt-2 space-y-2 max-h-40 overflow-y-auto p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
                 {#each categories as category}
                   <label 
                     class={`flex items-center justify-between p-2 rounded-md border w-full cursor-pointer ${
@@ -423,7 +424,10 @@
                         title="Hapus kategori"
                         aria-label="Hapus kategori {category.name}"
                         class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none ml-2 flex-shrink-0"
-                        on:click|stopPropagation={() => confirmDeleteCategory(category)}
+                        onclick={(e) => {
+                          e.stopPropagation();
+                          confirmDeleteCategory(category);
+                        }}
                       >
                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -489,7 +493,7 @@
     <div class="flex justify-end items-center space-x-3 pt-5 mt-4 border-t border-gray-200 dark:border-gray-700">
       <button
         type="button"
-        on:click={clearForm}
+        onclick={clearForm}
         class="px-5 py-2.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-200"
         title="Bersihkan form dan hapus marker sementara"
       >
@@ -504,6 +508,7 @@
       <button
         type="submit"
         disabled={submitting}
+        aria-label="Simpan Marker"
         class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200"
       >
         <span class="flex items-center">
@@ -551,14 +556,14 @@
           <button 
             type="button" 
             class="px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            on:click={closeConfirmDialog}
+            onclick={closeConfirmDialog}
           >
             Batal
           </button>
           <button 
             type="button" 
             class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            on:click={deleteCategory}
+            onclick={deleteCategory}
           >
             Hapus
           </button>

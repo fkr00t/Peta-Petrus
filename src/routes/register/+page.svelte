@@ -148,7 +148,7 @@
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <path stroke-linecap="round" stroke-join-point="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </span>
             <input
@@ -235,9 +235,8 @@
   .bg-primary-600 { background-color: var(--color-primary-600); }
   .bg-primary-700 { background-color: var(--color-primary-700); }
   .hover\:bg-primary-700:hover { background-color: var(--color-primary-700); }
-  .focus\:ring-primary-400:focus { --tw-ring-color: var(--color-primary-400); }
   .focus\:ring-primary-500:focus { --tw-ring-color: var(--color-primary-500); }
   .text-primary-600 { color: var(--color-primary-600); }
   .dark\:text-primary-400 { color: var(--color-primary-400); }
   .dark\:hover\:text-primary-300:hover { color: var(--color-primary-300); }
-</style> 
+</style>

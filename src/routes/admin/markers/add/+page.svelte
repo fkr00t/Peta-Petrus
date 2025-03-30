@@ -189,7 +189,7 @@
         <button 
           type="button" 
           class="ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex h-8 w-8 hover:bg-gray-200 dark:hover:bg-gray-700"
-          on:click={() => showNotification = false}
+          onclick={() => showNotification = false}
         >
           <span class="sr-only">Tutup</span>
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

@@ -530,42 +530,6 @@
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   
-  /* Info Panel */
-  .info-panel {
-    display: flex;
-    align-items: flex-start;
-    background-color: #f0fdfa;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid #ccfbf1;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  }
-  
-  .info-panel-icon {
-    flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
-    margin-right: 1rem;
-    color: #0d9488;
-  }
-  
-  .info-panel-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #0f766e;
-    margin-bottom: 0.5rem;
-  }
-  
-  .instruction-list {
-    padding-left: 1.25rem;
-    color: #1e40af;
-  }
-  
-  .instruction-list li {
-    margin-bottom: 0.25rem;
-  }
-
   /* Map Container */
   .map-container {
     height: 60vh;
@@ -831,4 +795,4 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
-</style> 
+</style>

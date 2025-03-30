@@ -251,7 +251,7 @@
           <p class="text-gray-500 dark:text-gray-400 mt-1">Tidak ada marker yang cocok dengan pencarian "{searchQuery}"</p>
           <button 
             class="mt-4 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-medium"
-            on:click={() => searchQuery = ''}
+            onclick={() => searchQuery = ''}
           >
             Hapus pencarian
           </button>
@@ -279,7 +279,7 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th scope="col" class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" on:click={() => sortMarkers('title')}>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onclick={() => sortMarkers('title')}>
                 <div class="flex items-center">
                   <span>Judul</span>
                   {#if sortField === 'title'}
@@ -289,7 +289,7 @@
                   {/if}
                 </div>
               </th>
-              <th scope="col" class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" on:click={() => sortMarkers('createdAt')}>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onclick={() => sortMarkers('createdAt')}>
                 <div class="flex items-center">
                   <span>Waktu Dibuat</span>
                   {#if sortField === 'createdAt'}
@@ -299,7 +299,7 @@
                   {/if}
                 </div>
               </th>
-              <th scope="col" class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" on:click={() => sortMarkers('createdBy')}>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onclick={() => sortMarkers('createdBy')}>
                 <div class="flex items-center">
                   <span>Pembuat</span>
                   {#if sortField === 'createdBy'}
@@ -358,7 +358,7 @@
                     <button 
                       class="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-800/50 transition-colors"
                       title="Hapus marker"
-                      on:click={() => openDeleteModal(marker)}
+                      onclick={() => openDeleteModal(marker)}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -409,13 +409,13 @@
         <div class="mt-6 flex justify-end space-x-3">
           <button 
             class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
-            on:click={closeDeleteModal}
+            onclick={closeDeleteModal}
           >
             Batal
           </button>
           <button 
             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center"
-            on:click={deleteMarker}
+            onclick={deleteMarker}
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
