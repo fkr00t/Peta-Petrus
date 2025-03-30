@@ -12,6 +12,7 @@ declare global {
 				updatedAt: Date;
 			} | null;
 			isAdmin: boolean;
+			csrfToken?: string;
 		}
 		// interface PageData {}
 		// interface PageState {}

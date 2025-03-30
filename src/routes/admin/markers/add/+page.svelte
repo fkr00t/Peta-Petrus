@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   import Map from '$lib/components/Map.svelte';
   import MarkerForm from '$lib/components/MarkerForm.svelte';
   
@@ -100,13 +101,15 @@
         city: formData.get('city'),
         imageUrl: formData.get('imageUrl'),
         url: formData.get('url'),
-        categoryId: formData.get('categoryId')
+        categoryId: formData.get('categoryId'),
+        csrf: $page.data.csrfToken
       };
   
       const response = await fetch('/api/markers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': $page.data.csrfToken || ''
         },
         body: JSON.stringify(markerData),
       });

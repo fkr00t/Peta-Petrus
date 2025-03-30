@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { prisma } from '$lib/server/prisma';
+import { validateCsrfRequest } from '$lib/server/csrf';
 import type { RequestHandler } from './$types';
 
 // DELETE - Menghapus kategori berdasarkan ID
-export const DELETE: RequestHandler = async ({ params, locals }) => {
+export const DELETE: RequestHandler = async ({ params, locals, request, cookies }) => {
   const { id } = params;
   const user = locals.user;
   
@@ -17,6 +18,24 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
   }
   
   try {
+    // Validasi CSRF token
+    const csrfHeader = request.headers.get('X-CSRF-Token');
+    let csrfToken = csrfHeader;
+    
+    // Coba ambil dari body jika tidak ada di header (opsional, karena DELETE mungkin tidak memiliki body)
+    if (!csrfToken) {
+      try {
+        const requestData = await request.json();
+        csrfToken = requestData.csrf;
+      } catch (e) {
+        // Ignore error jika tidak ada body
+      }
+    }
+    
+    if (!csrfToken || !validateCsrfRequest(cookies, csrfToken)) {
+      return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
+    }
+    
     // Cek apakah kategori ada
     const category = await prisma.category.findUnique({
       where: { id },

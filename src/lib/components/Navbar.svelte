@@ -28,9 +28,20 @@
       isLoggingOut = true;
       logoutError = '';
       
+      // Pastikan CSRF token tersedia
+      if (!$page.data.csrfToken) {
+        console.error('CSRF token not available');
+        logoutError = 'Token keamanan tidak tersedia';
+        showLogoutConfirm = false;
+        return;
+      }
+      
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': $page.data.csrfToken
+        }
       });
       
       if (response.ok) {

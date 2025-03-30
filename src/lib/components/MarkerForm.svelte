@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { page } from '$app/stores';
 
   export let latitude: number | null = null;
   export let longitude: number | null = null;
@@ -58,8 +59,12 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': $page.data.csrfToken || ''
         },
-        body: JSON.stringify({ name: newCategory.trim() }),
+        body: JSON.stringify({ 
+          name: newCategory.trim(),
+          csrf: $page.data.csrfToken 
+        }),
       });
 
       if (response.ok) {
@@ -113,6 +118,9 @@
     try {
       const response = await fetch(`/api/categories/${categoryId}`, {
         method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': $page.data.csrfToken || ''
+        }
       });
 
       if (response.ok) {

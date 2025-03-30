@@ -1,13 +1,33 @@
 import { json } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '$lib/server/auth';
+import { validateCsrfRequest } from '$lib/server/csrf';
+import { verifyTurnstileToken } from '$lib/server/captcha';
 import type { RequestEvent } from '@sveltejs/kit';
 
 const prisma = new PrismaClient();
 
 export async function POST(event: RequestEvent) {
   try {
-    const { username, password } = await event.request.json();
+    const { username, password, csrf, captchaToken } = await event.request.json();
+    
+    // Validasi CSRF token
+    const csrfHeader = event.request.headers.get('X-CSRF-Token');
+    const csrfToken = csrf || csrfHeader;
+    
+    if (!csrfToken || !validateCsrfRequest(event.cookies, csrfToken)) {
+      return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
+    }
+    
+    // Validasi Captcha
+    if (!captchaToken) {
+      return json({ message: 'Verifikasi captcha diperlukan' }, { status: 400 });
+    }
+    
+    const isValidCaptcha = await verifyTurnstileToken(captchaToken, event.getClientAddress());
+    if (!isValidCaptcha) {
+      return json({ message: 'Verifikasi captcha tidak valid' }, { status: 400 });
+    }
     
     // Validasi input
     if (!username || !password) {

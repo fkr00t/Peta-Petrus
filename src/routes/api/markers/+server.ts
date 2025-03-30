@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { prisma } from '$lib/server/prisma';
+import { validateCsrfRequest } from '$lib/server/csrf';
 import type { RequestHandler } from './$types';
 
 // GET - Dapatkan semua marker
@@ -28,8 +29,8 @@ export const GET: RequestHandler = async () => {
 };
 
 // POST - Buat marker baru
-export const POST: RequestHandler = async ({ request, locals }) => {
-  const user = locals.user;
+export const POST: RequestHandler = async (event) => {
+  const user = event.locals.user;
   
   // Pastikan pengguna sudah login
   if (!user) {
@@ -42,7 +43,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }
   
   try {
-    const body = await request.json();
+    const body = await event.request.json();
+    
+    // Validasi CSRF token
+    const csrfHeader = event.request.headers.get('X-CSRF-Token');
+    const csrfToken = body.csrf || csrfHeader;
+    
+    if (!csrfToken || !validateCsrfRequest(event.cookies, csrfToken)) {
+      return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
+    }
     
     // Validasi input
     if (!body.title) {

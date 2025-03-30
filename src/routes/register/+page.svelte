@@ -1,11 +1,16 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import CsrfToken from '$lib/components/CsrfToken.svelte';
+  import Turnstile from '$lib/components/Turnstile.svelte';
   
   let username = '';
   let password = '';
   let confirmPassword = '';
   let loading = false;
   let error = '';
+  let captchaToken = '';
+  let captchaError = '';
   
   async function handleRegister() {
     if (!username || !password || !confirmPassword) {
@@ -18,18 +23,27 @@
       return;
     }
     
+    if (!captchaToken) {
+      captchaError = 'Silahkan selesaikan verifikasi captcha terlebih dahulu';
+      return;
+    }
+    
     loading = true;
     error = '';
+    captchaError = '';
     
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': $page.data.csrfToken || ''
         },
         body: JSON.stringify({
           username,
-          password
+          password,
+          csrf: $page.data.csrfToken,
+          captchaToken
         })
       });
       
@@ -48,6 +62,20 @@
     } finally {
       loading = false;
     }
+  }
+  
+  function handleCaptchaVerify(token: string) {
+    captchaToken = token;
+    captchaError = '';
+  }
+  
+  function handleCaptchaError() {
+    captchaError = 'Terjadi kesalahan pada verifikasi captcha';
+  }
+  
+  function handleCaptchaExpire() {
+    captchaToken = '';
+    captchaError = 'Verifikasi captcha sudah kedaluwarsa, silakan verifikasi ulang';
   }
 </script>
 
@@ -123,6 +151,8 @@
       {/if}
       
       <form on:submit|preventDefault={handleRegister} class="space-y-6">
+        <CsrfToken />
+        
         <div>
           <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
           <div class="relative">
@@ -148,7 +178,7 @@
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-join-point="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </span>
             <input
@@ -181,6 +211,19 @@
               placeholder="Konfirmasi password Anda"
             />
           </div>
+        </div>
+        
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verifikasi Keamanan</label>
+          <Turnstile 
+            onVerify={handleCaptchaVerify} 
+            onError={handleCaptchaError} 
+            onExpire={handleCaptchaExpire}
+            theme="auto"
+          />
+          {#if captchaError}
+            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{captchaError}</p>
+          {/if}
         </div>
         
         <div>

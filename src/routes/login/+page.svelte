@@ -1,11 +1,18 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { setAccessTokenExpiry } from '$lib/client/auth';
+  import CsrfToken from '$lib/components/CsrfToken.svelte';
+  import Turnstile from '$lib/components/Turnstile.svelte';
   
   let username = '';
   let password = '';
+  let rememberMe = false;
   let loading = false;
   let error = '';
+  let failedAttempts = 0;
+  let captchaToken = '';
+  let captchaError = '';
   
   async function handleLogin() {
     if (!username || !password) {
@@ -13,24 +20,39 @@
       return;
     }
     
+    // Jika sudah 3 kali percobaan gagal, wajib captcha
+    if (failedAttempts >= 3 && !captchaToken) {
+      captchaError = 'Silahkan selesaikan verifikasi keamanan terlebih dahulu';
+      return;
+    }
+    
     loading = true;
     error = '';
+    captchaError = '';
     
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': $page.data.csrfToken || ''
         },
         body: JSON.stringify({
           username,
-          password
+          password,
+          rememberMe,
+          csrf: $page.data.csrfToken,
+          captchaToken: failedAttempts >= 3 ? captchaToken : undefined
         })
       });
       
       const data = await response.json();
       
       if (response.ok) {
+        if (data.accessTokenExpiresIn) {
+          setAccessTokenExpiry(data.accessTokenExpiresIn);
+        }
+        
         if (data.user && data.user.role === 'ADMIN') {
           goto('/admin/dashboard');
         } else {
@@ -39,13 +61,29 @@
         window.location.href = data.user && data.user.role === 'ADMIN' ? '/admin/dashboard' : '/';
       } else {
         error = data.message || 'Login gagal, silakan coba lagi.';
+        failedAttempts++;
       }
     } catch (err) {
       console.error('Error during login:', err);
       error = 'Terjadi kesalahan saat login. Silakan coba lagi.';
+      failedAttempts++;
     } finally {
       loading = false;
     }
+  }
+  
+  function handleCaptchaVerify(token: string) {
+    captchaToken = token;
+    captchaError = '';
+  }
+  
+  function handleCaptchaError() {
+    captchaError = 'Terjadi kesalahan pada verifikasi keamanan';
+  }
+  
+  function handleCaptchaExpire() {
+    captchaToken = '';
+    captchaError = 'Verifikasi keamanan sudah kedaluwarsa, silakan verifikasi ulang';
   }
 </script>
 
@@ -110,6 +148,8 @@
       {/if}
       
       <form on:submit|preventDefault={handleLogin} class="space-y-6">
+        <CsrfToken />
+        
         <div>
           <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
           <div class="relative">
@@ -149,6 +189,37 @@
             />
           </div>
         </div>
+        
+        <div class="flex items-center">
+          <input
+            id="rememberMe"
+            name="rememberMe"
+            type="checkbox"
+            bind:checked={rememberMe}
+            class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded"
+          />
+          <label for="rememberMe" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            Ingat saya
+          </label>
+        </div>
+        
+        {#if failedAttempts >= 3}
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verifikasi Keamanan</label>
+            <div class="text-xs text-amber-600 dark:text-amber-400 mb-2">
+              Terlalu banyak percobaan gagal. Harap selesaikan verifikasi keamanan berikut.
+            </div>
+            <Turnstile 
+              onVerify={handleCaptchaVerify} 
+              onError={handleCaptchaError} 
+              onExpire={handleCaptchaExpire}
+              theme="auto"
+            />
+            {#if captchaError}
+              <p class="mt-2 text-sm text-red-600 dark:text-red-400">{captchaError}</p>
+            {/if}
+          </div>
+        {/if}
         
         <div>
           <button

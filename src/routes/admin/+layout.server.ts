@@ -14,6 +14,7 @@ export const load = async ({ locals }) => {
 
   return {
     user: locals.user,
-    isAdmin: admin
+    isAdmin: admin,
+    csrfToken: locals.csrfToken || null
   };
 }; 

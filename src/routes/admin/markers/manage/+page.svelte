@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   
   interface CreatedBy {
     id: string;
@@ -109,7 +110,12 @@
     
     try {
       const response = await fetch(`/api/markers/${idToDelete}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': $page.data.csrfToken || ''
+        },
+        // Beberapa browser tidak mendukung body untuk request DELETE,
+        // tetapi kita tetap menggunakan header sebagai cara utama mengirimkan token CSRF
       });
       
       if (response.ok) {

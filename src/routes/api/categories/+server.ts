@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { prisma } from '$lib/server/prisma';
+import { validateCsrfRequest } from '$lib/server/csrf';
 import type { RequestHandler } from './$types';
 
 // GET - Mendapatkan semua kategori
@@ -51,7 +52,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 };
 
 // POST - Membuat kategori baru
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   const user = locals.user;
   
   // Pastikan pengguna sudah login dan memiliki role ADMIN
@@ -65,6 +66,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   
   try {
     const body = await request.json();
+    
+    // Validasi CSRF token
+    const csrfHeader = request.headers.get('X-CSRF-Token');
+    const csrfToken = body.csrf || csrfHeader;
+    
+    if (!csrfToken || !validateCsrfRequest(cookies, csrfToken)) {
+      return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
+    }
     
     // Validasi input
     if (!body.name) {

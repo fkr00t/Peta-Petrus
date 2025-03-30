@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   import Map from '$lib/components/Map.svelte';
   
   interface Marker {
@@ -144,12 +145,14 @@
         description: description || null,
         latitude,
         longitude,
+        csrf: $page.data.csrfToken
       };
       
       const response = await fetch(`/api/markers/${markerId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': $page.data.csrfToken || ''
         },
         body: JSON.stringify(updateData),
       });

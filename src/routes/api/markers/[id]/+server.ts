@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 import { isAdmin } from '$lib/server/auth';
+import { validateCsrfRequest } from '$lib/server/csrf';
 import type { RequestEvent } from '@sveltejs/kit';
 
 const prisma = new PrismaClient();
@@ -36,7 +37,7 @@ export async function GET({ params, locals }: RequestEvent) {
 }
 
 // PUT - Update marker
-export async function PUT({ request, params, locals }: RequestEvent) {
+export async function PUT({ request, params, locals, cookies }: RequestEvent) {
   try {
     if (!locals.user) {
       return json({ message: 'Tidak terautentikasi' }, { status: 401 });
@@ -48,7 +49,16 @@ export async function PUT({ request, params, locals }: RequestEvent) {
       return json({ message: 'Tidak memiliki izin untuk memperbarui marker' }, { status: 403 });
     }
     
-    const { title, description, latitude, longitude } = await request.json();
+    const requestData = await request.json();
+    const { title, description, latitude, longitude, csrf } = requestData;
+    
+    // Validasi CSRF token
+    const csrfHeader = request.headers.get('X-CSRF-Token');
+    const csrfToken = csrf || csrfHeader;
+    
+    if (!csrfToken || !validateCsrfRequest(cookies, csrfToken)) {
+      return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
+    }
     
     // Validasi input
     if (!title || latitude === undefined || longitude === undefined) {
@@ -84,7 +94,7 @@ export async function PUT({ request, params, locals }: RequestEvent) {
 }
 
 // DELETE - Hapus marker
-export async function DELETE({ params, locals }: RequestEvent) {
+export async function DELETE({ params, locals, request, cookies }: RequestEvent) {
   try {
     if (!locals.user) {
       return json({ message: 'Tidak terautentikasi' }, { status: 401 });
@@ -94,6 +104,24 @@ export async function DELETE({ params, locals }: RequestEvent) {
     
     if (!admin) {
       return json({ message: 'Tidak memiliki izin untuk menghapus marker' }, { status: 403 });
+    }
+    
+    // Validasi CSRF token
+    const csrfHeader = request.headers.get('X-CSRF-Token');
+    let csrfToken = csrfHeader;
+    
+    // Coba ambil dari body jika tidak ada di header (opsional, karena DELETE mungkin tidak memiliki body)
+    if (!csrfToken) {
+      try {
+        const requestData = await request.json();
+        csrfToken = requestData.csrf;
+      } catch (e) {
+        // Ignore error jika tidak ada body
+      }
+    }
+    
+    if (!csrfToken || !validateCsrfRequest(cookies, csrfToken)) {
+      return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
     }
     
     // Cek apakah marker ada

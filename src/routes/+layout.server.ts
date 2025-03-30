@@ -10,6 +10,7 @@ export const load = (async ({ locals, url }) => {
   
   return {
     user: locals.user || null,
-    isAdmin: locals.isAdmin || false
+    isAdmin: locals.isAdmin || false,
+    csrfToken: locals.csrfToken || null
   };
 }) satisfies ServerLoad; 
