@@ -56,7 +56,7 @@ Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna u
 - **SvelteKit API Routes**: Server-side endpoints untuk aplikasi
 - **Prisma ORM**: TypeScript ORM untuk akses database yang type-safe
 - **JWT**: JSON Web Tokens untuk autentikasi dan otorisasi
-- **bcrypt**: Untuk hashing password dan keamanan autentikasi
+- **argon2**: Untuk hashing password dan keamanan autentikasi
 
 ### Keamanan
 - **Cloudflare Turnstile**: Captcha modern untuk melindungi form login dan register
@@ -328,7 +328,7 @@ model RefreshToken {
 
 ### Praktik Keamanan yang Diterapkan
 - **JWT dengan Refresh Token**: Authentication system two-tier dengan access token dan refresh token
-- **Hashing Password**: Semua password di-hash menggunakan algoritma bcrypt
+- **Hashing Password**: Semua password di-hash menggunakan algoritma argon2
 - **CSRF Protection**: Token CSRF untuk semua form dan API request dengan HttpOnly cookies
 - **Captcha Protection**: Cloudflare Turnstile untuk mencegah otomatisasi berbahaya
   - Wajib untuk semua registrasi
