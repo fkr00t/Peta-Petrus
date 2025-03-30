@@ -1,12 +1,13 @@
 # Peta Petrus
 
-Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna untuk menjelajahi dan mengelola titik-titik lokasi pada peta. Aplikasi ini menyediakan antarmuka yang intuitif untuk memvisualisasikan data geografis, dengan fokus pada penandaan lokasi beserta informasi detailnya.
+Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna untuk menjelajahi dan mengelola titik-titik lokasi pada peta. Aplikasi ini menyediakan antarmuka yang intuitif untuk memvisualisasikan data geografis, dengan fokus pada penandaan lokasi pelanggaran HAM beserta informasi detailnya.
 
 ## Daftar Isi
 - [Fitur Utama](#fitur-utama)
 - [Teknologi yang Digunakan](#teknologi-yang-digunakan)
 - [Struktur Aplikasi](#struktur-aplikasi)
 - [Panduan Instalasi](#panduan-instalasi)
+- [Konfigurasi Keamanan](#konfigurasi-keamanan)
 - [Penggunaan Aplikasi](#penggunaan-aplikasi)
 - [API Endpoints](#api-endpoints)
 - [Model Data](#model-data)
@@ -36,7 +37,10 @@ Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna u
 - **Animasi dan Transisi**: Efek visual yang meningkatkan pengalaman pengguna
 
 ### Keamanan dan Administrasi
-- **Sistem Autentikasi**: Login untuk admin dan pengguna terdaftar
+- **Sistem Autentikasi**: Login untuk admin dan pengguna terdaftar dengan JWT
+- **Token Refresh**: Implementasi access token dan refresh token untuk keamanan
+- **CSRF Protection**: Perlindungan terhadap serangan Cross-Site Request Forgery
+- **Captcha**: Integrasi Cloudflare Turnstile untuk mencegah otomatisasi berbahaya
 - **Kontrol Akses**: Pembatasan fitur berdasarkan peran pengguna (RBAC)
 - **Validasi Input**: Validasi data di client dan server untuk keamanan
 
@@ -54,15 +58,21 @@ Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna u
 - **JWT**: JSON Web Tokens untuk autentikasi dan otorisasi
 - **bcrypt**: Untuk hashing password dan keamanan autentikasi
 
+### Keamanan
+- **Cloudflare Turnstile**: Captcha modern untuk melindungi form login dan register
+- **CSRF Token**: Implementasi token CSRF untuk keamanan form dan API
+- **HttpOnly Cookies**: Cookie aman untuk penyimpanan token autentikasi
+- **Rate Limiting**: Pembatasan percobaan login yang gagal dengan captcha otomatis
+
 ### Database
-- **PostgreSQL/MySQL/SQLite**: Database relasional untuk menyimpan data aplikasi
+- **MySQL**: Database relasional untuk menyimpan data aplikasi
 - **Prisma Migrations**: Manajemen skema database dan migrasi
 
 ### Development Tools
 - **Vite**: Build tool dan development server
 - **ESLint**: Linting kode untuk menjaga kualitas dan konsistensi
 - **Prettier**: Formatter kode
-- **GitHub Actions**: CI/CD untuk otomatisasi build dan test
+- **Multi-environment setup**: Konfigurasi berbeda untuk development dan production
 
 ## Struktur Aplikasi
 
@@ -70,20 +80,24 @@ Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna u
 peta-petrus/
 ├── prisma/                 # Konfigurasi database
 │   ├── schema.prisma       # Skema model database
-│   └── seed.ts             # Script untuk mengisi data awal
+│   └── migrations/         # Migrasi database
 ├── src/
 │   ├── lib/                # Kode yang dapat digunakan kembali
 │   │   ├── components/     # Komponen UI Svelte
 │   │   │   ├── Map.svelte  # Komponen peta utama
+│   │   │   ├── Turnstile.svelte # Komponen captcha Cloudflare
 │   │   │   └── ...
 │   │   ├── server/         # Kode server-side
 │   │   │   ├── auth.ts     # Logika autentikasi
+│   │   │   ├── csrf.ts     # Proteksi CSRF
+│   │   │   ├── captcha.ts  # Verifikasi captcha
 │   │   │   └── prisma.ts   # Instansiasi dan konfigurasi Prisma
 │   ├── routes/             # Rute dan halaman aplikasi
 │   │   ├── +layout.svelte  # Layout aplikasi umum
 │   │   ├── +page.svelte    # Halaman utama dengan peta
+│   │   ├── login/          # Halaman login
+│   │   ├── register/       # Halaman register
 │   │   ├── admin/          # Halaman admin
-│   │   │   └── markers/    # Pengelolaan marker
 │   │   └── api/            # API endpoints
 │   │       ├── auth/       # Endpoint autentikasi
 │   │       ├── markers/    # Endpoint untuk marker
@@ -91,8 +105,6 @@ peta-petrus/
 │   ├── app.html            # Template HTML utama
 │   └── app.css             # Style global
 ├── static/                 # Asset statis
-├── .github/                # Konfigurasi GitHub
-│   └── workflows/          # Konfigurasi CI/CD
 ├── .env.example            # Contoh konfigurasi environment
 └── package.json            # Dependensi dan skrip
 ```
@@ -102,8 +114,9 @@ peta-petrus/
 ### Prasyarat
 - Node.js (versi 16.x atau lebih baru)
 - npm atau pnpm
-- Database (PostgreSQL, MySQL, atau SQLite)
+- MySQL Database
 - Git
+- Akun Cloudflare (untuk Turnstile captcha)
 
 ### Langkah-langkah Instalasi
 
@@ -126,18 +139,13 @@ peta-petrus/
    # Edit .env dengan editor pilihan Anda
    ```
 
-   Konfigurasi penting dalam `.env`:
-   - `DATABASE_URL`: URL koneksi ke database
-   - `JWT_SECRET`: String acak yang panjang untuk keamanan token
-   - `PUBLIC_APP_URL`: URL aplikasi Anda
-
 4. **Setup database dan migrasi**
    ```bash
    # Jalankan migrasi database
    npx prisma migrate dev
    
-   # Opsional: Seed database dengan data awal
-   npx prisma db seed
+   # Generate Prisma client
+   npx prisma generate
    ```
 
 5. **Jalankan aplikasi dalam mode development**
@@ -148,6 +156,56 @@ peta-petrus/
    ```
    
    Aplikasi akan tersedia di `http://localhost:5173`
+
+## Konfigurasi Keamanan
+
+### Environment Variables (.env)
+
+```
+# Database
+DATABASE_URL="mysql://username:password@localhost:3306/database_name"
+
+# JWT Authentication
+ACCESS_TOKEN_SECRET="your_strong_random_secret"
+ACCESS_TOKEN_EXPIRES_IN="15m"
+
+# CSRF Protection
+CSRF_SECRET="your_strong_random_csrf_secret"
+
+# Cloudflare Turnstile
+TURNSTILE_SITE_KEY="your_turnstile_site_key"
+TURNSTILE_SECRET_KEY="your_turnstile_secret_key"
+PUBLIC_TURNSTILE_SITE_KEY="your_turnstile_site_key"
+
+# Application
+PUBLIC_APP_URL="http://localhost:5173"
+NODE_ENV="development"
+```
+
+### Mendapatkan Kunci Cloudflare Turnstile
+
+1. Buat akun atau login ke [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. Pilih menu "Security" → "Turnstile"
+3. Klik "Add Site" dan ikuti langkah-langkah berikut:
+   - Masukkan domain aplikasi Anda
+   - Pilih mode yang sesuai:
+     - Development: "Testing Only, Always Pass" (hanya untuk pengembangan)
+     - Production: "Managed" atau "Non-Interactive" (untuk lingkungan produksi)
+4. Salin "Site Key" dan "Secret Key" yang diberikan
+5. Isi di file `.env` seperti berikut:
+   ```
+   TURNSTILE_SITE_KEY="your_site_key"
+   TURNSTILE_SECRET_KEY="your_secret_key"
+   PUBLIC_TURNSTILE_SITE_KEY="your_site_key"
+   ```
+
+### Mode Development vs Production
+
+Untuk deployment production:
+1. Ubah mode Turnstile di dashboard Cloudflare dari "Testing Only" ke "Managed"
+2. Dapatkan kunci produksi baru dan perbarui di `.env`
+3. Ubah `NODE_ENV="production"` di `.env`
+4. Bangun aplikasi dengan `npm run build`
 
 ## Penggunaan Aplikasi
 
@@ -169,17 +227,12 @@ peta-petrus/
    - Setelah login, akses `/admin/dashboard`
 
 2. **Mengelola Marker**
-   - Lihat daftar marker di `/admin/markers/manage`
-   - Tambah marker baru di `/admin/markers/add`
-     - Klik pada peta untuk memilih lokasi
-     - Isi formulir dengan detail marker
-     - Pilih kategori dan klik "Simpan"
-   - Edit marker di `/admin/markers/edit/{id}`
-   - Hapus marker dengan mengklik tombol hapus dan konfirmasi
+   - Tambah marker baru dengan mengklik pada peta
+   - Isi formulir dengan detail marker
+   - Pilih kategori dan klik "Simpan Marker"
 
 3. **Mengelola Kategori**
    - Tambah, edit, dan hapus kategori untuk marker
-   - Kustomisasi ikon dan warna untuk setiap kategori
 
 ## API Endpoints
 
@@ -187,8 +240,9 @@ Aplikasi menyediakan API RESTful berikut:
 
 ### Autentikasi
 - `POST /api/auth/login` - Login dan mendapatkan token
-- `POST /api/auth/register` - Registrasi pengguna baru (jika diizinkan)
-- `GET /api/auth/logout` - Logout dan invalidasi token
+- `POST /api/auth/register` - Registrasi pengguna baru
+- `POST /api/auth/logout` - Logout dan invalidasi token
+- `POST /api/auth/refresh` - Refresh access token
 
 ### Marker
 - `GET /api/markers` - Mendapatkan semua marker
@@ -199,9 +253,7 @@ Aplikasi menyediakan API RESTful berikut:
 
 ### Kategori
 - `GET /api/categories` - Mendapatkan semua kategori
-- `GET /api/categories/:id` - Mendapatkan detail kategori
 - `POST /api/categories` - Menambah kategori baru (admin only)
-- `PUT /api/categories/:id` - Mengupdate kategori (admin only)
 - `DELETE /api/categories/:id` - Menghapus kategori (admin only)
 
 ## Model Data
@@ -209,14 +261,20 @@ Aplikasi menyediakan API RESTful berikut:
 ### User
 ```prisma
 model User {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  markers   Marker[]
+  id           String         @id @default(uuid())
+  username     String         @unique
+  password     String
+  role         Role           @default(USER)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  markers      Marker[]
+  categories   Category[]
+  refreshTokens RefreshToken[]
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 ```
 
@@ -229,10 +287,12 @@ model Marker {
   latitude    Float
   longitude   Float
   city        String?
+  imageUrl    String?
+  url         String?
   categoryId  String?
   category    Category? @relation(fields: [categoryId], references: [id])
   userId      String
-  createdBy   User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -244,36 +304,56 @@ model Category {
   id          String   @id @default(uuid())
   name        String   @unique
   description String?
-  color       String?
-  icon        String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
   markers     Marker[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 ```
 
+### RefreshToken
+```prisma
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+```
+
 ## Keamanan
 
 ### Praktik Keamanan yang Diterapkan
+- **JWT dengan Refresh Token**: Authentication system two-tier dengan access token dan refresh token
 - **Hashing Password**: Semua password di-hash menggunakan algoritma bcrypt
-- **JWT untuk Autentikasi**: Menggunakan token JWT dengan masa aktif terbatas
-- **Validasi Input**: Validasi client-side dan server-side untuk semua input pengguna
-- **CSRF Protection**: Perlindungan terhadap serangan Cross-Site Request Forgery
+- **CSRF Protection**: Token CSRF untuk semua form dan API request dengan HttpOnly cookies
+- **Captcha Protection**: Cloudflare Turnstile untuk mencegah otomatisasi berbahaya
+  - Wajib untuk semua registrasi
+  - Kondisional untuk login (setelah 3x percobaan gagal)
+- **Token Separation**: Secret terpisah untuk JWT, CSRF, dan layanan lainnya
+- **Rate Limiting**: Pembatasan percobaan login untuk mencegah serangan brute force
 - **Role-Based Access Control**: Pembatasan akses berdasarkan peran pengguna
 
 ### Rekomendasi untuk Production
 - Gunakan HTTPS untuk semua komunikasi
 - Atur header keamanan seperti CSP, CORS, dan X-XSS-Protection
-- Terapkan rate limiting untuk API endpoint
 - Gunakan audit trail untuk operasi sensitif
-- Jalankan regular security audit
+- Aktifkan mode "Managed" untuk Cloudflare Turnstile di lingkungan produksi
+- Jalankan regular security audit dan pembaruan dependensi
 
 ## Deployment
 
 ### Persiapan Production Build
 ```bash
+# Buat file .env.production
+cp .env .env.production
+# Edit .env.production sesuai kebutuhan produksi
+
 # Buat build production
-npm run build
+NODE_ENV=production npm run build
 
 # Verifikasi build
 npm run preview
@@ -290,21 +370,12 @@ npm install -g vercel
 vercel
 ```
 
-#### Netlify
-```bash
-# Install Netlify CLI
-npm install -g netlify-cli
-
-# Deploy dengan Netlify
-netlify deploy
-```
-
 #### Server Tradisional
 ```bash
 # Build aplikasi
 npm run build
 
-# Gunakan Node.js atau adaptador lain untuk menjalankan aplikasi
+# Gunakan Node.js untuk menjalankan aplikasi
 node build
 ```
 
@@ -337,10 +408,6 @@ Kami sangat menghargai kontribusi dari komunitas. Berikut cara Anda dapat berkon
 
 [MIT License](LICENSE)
 
-## Tim Pengembang
-
-- Pengembang Utama - [Nama Anda](https://github.com/username)
-
 ---
 
-*Terakhir diperbarui: [Tanggal]*
+*Terakhir diperbarui: Maret 2024*
