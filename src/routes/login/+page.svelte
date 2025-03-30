@@ -31,19 +31,13 @@
       const data = await response.json();
       
       if (response.ok) {
-        // Login berhasil, cek role user
         if (data.user && data.user.role === 'ADMIN') {
-          // Jika admin, redirect ke dashboard admin
           goto('/admin/dashboard');
         } else {
-          // Jika bukan admin, redirect ke halaman utama
           goto('/');
         }
-        
-        // Solusi untuk masalah refresh: reload halaman untuk memastikan data user tersedia
         window.location.href = data.user && data.user.role === 'ADMIN' ? '/admin/dashboard' : '/';
       } else {
-        // Login gagal, tampilkan pesan error
         error = data.message || 'Login gagal, silakan coba lagi.';
       }
     } catch (err) {
@@ -61,7 +55,6 @@
 </svelte:head>
 
 <div class="flex min-h-screen bg-gradient-to-b from-blue-100 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-  <!-- Bagian kiri: Ilustrasi dan Deskripsi -->
   <div class="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 bg-primary-700 text-white">
     <div class="max-w-md">
       <div class="mb-8 text-center">
@@ -98,7 +91,6 @@
     </div>
   </div>
   
-  <!-- Bagian kanan: Form Login -->
   <div class="w-full lg:w-1/2 flex items-center justify-center p-6">
     <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
       <div class="text-center mb-8">
@@ -107,7 +99,7 @@
       </div>
       
       {#if error}
-        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-400 rounded-md">
+        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-400 rounded-md" role="alert">
           <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -162,7 +154,7 @@
           <button
             type="submit"
             disabled={loading}
-            class="w-full py-3 px-4 flex items-center justify-center text-white bg-primary-600 hover:bg-primary-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors disabled:opacity-50 font-medium"
+            class="w-full py-3 px-4 flex items-center justify-center text-white bg-primary-600 hover:bg-primary-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors disabled:opacity-50 font-medium"
           >
             {#if loading}
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -179,7 +171,7 @@
       
       <div class="mt-8 text-center">
         <p class="text-gray-600 dark:text-gray-400">Belum punya akun?</p>
-        <a href="/register" class="mt-1 inline-block font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">
+        <a href="/register" class="mt-1 inline-block font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 focus:ring-2 focus:ring-primary-400">
           Daftar sekarang
         </a>
       </div>
@@ -188,7 +180,6 @@
 </div>
 
 <style>
-  /* Variabel untuk warna primary */
   :root {
     --color-primary-300: rgb(147, 197, 253);
     --color-primary-400: rgb(96, 165, 250);
@@ -197,7 +188,6 @@
     --color-primary-700: rgb(29, 78, 216);
   }
   
-  /* Dukungan dark mode */
   :global(.dark) {
     --color-primary-300: rgb(180, 210, 255);
     --color-primary-400: rgb(129, 185, 255);
@@ -206,13 +196,12 @@
     --color-primary-700: rgb(37, 105, 240);
   }
   
-  /* Kelas untuk warna primary */
   .bg-primary-600 { background-color: var(--color-primary-600); }
   .bg-primary-700 { background-color: var(--color-primary-700); }
   .hover\:bg-primary-700:hover { background-color: var(--color-primary-700); }
-  .focus\:ring-primary-400:focus { --tw-ring-color: var(--color-primary-400); }
   .focus\:ring-primary-500:focus { --tw-ring-color: var(--color-primary-500); }
+  .focus\:ring-primary-400:focus { --tw-ring-color: var(--color-primary-400); }
   .text-primary-600 { color: var(--color-primary-600); }
   .dark\:text-primary-400 { color: var(--color-primary-400); }
   .dark\:hover\:text-primary-300:hover { color: var(--color-primary-300); }
-</style> 
+</style>

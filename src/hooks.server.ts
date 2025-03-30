@@ -1,7 +1,13 @@
 import { verifyToken, getUserById } from '$lib/server/auth';
 import type { Handle } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
+  // Redirect untuk /auth/login
+  if (event.url.pathname === '/auth/login') {
+    throw redirect(302, '/login');
+  }
+  
   // Dapatkan token dari cookies
   const token = event.cookies.get('token');
   

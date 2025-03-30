@@ -2,12 +2,10 @@
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 
-	// Error information
 	$: ({ status, message } = $page.status === 404 
 		? { status: 404, message: 'Page Not Found' }
 		: { status: $page.status || 500, message: $page.error?.message || 'Something Went Wrong' });
 
-	// Dynamic descriptions
 	$: description = status === 404 
 		? "The page you're looking for doesn't exist or has been moved."
 		: "We're experiencing technical difficulties. Please try again later.";
@@ -29,7 +27,7 @@
 	>
 		<!-- Header with dynamic gradient based on error type -->
 		<div class={`relative p-8 ${status === 404 ? 'bg-gradient-to-r from-blue-600 to-indigo-700' : 'bg-gradient-to-r from-rose-600 to-pink-700'}`}>
-			<div class="absolute inset-0 opacity-10 pattern-dots pattern-blue-500 pattern-size-4 pattern-opacity-20 dark:pattern-opacity-10" />
+			<div class="absolute inset-0 opacity-10 pattern-dots pattern-blue-500 pattern-size-4 pattern-opacity-20 dark:pattern-opacity-10"></div>
 			<div class="relative z-10 flex flex-col items-center text-center space-y-4">
 				<div class="flex items-center justify-center w-20 h-20 bg-white/10 backdrop-blur-sm rounded-full">
 					{#if status === 404}
@@ -62,7 +60,7 @@
 					href="/" 
 					class="group relative p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all hover:shadow-md overflow-hidden"
 				>
-					<div class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-white dark:from-indigo-900/20 dark:to-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+					<div class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-white dark:from-indigo-900/20 dark:to-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 					<div class="relative z-10 flex items-start">
 						<div class="flex-shrink-0 mt-1 w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-4">
 							<svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,10 +75,10 @@
 				</a>
 
 				<button 
-					on:click={goBack} 
+					onclick={goBack} 
 					class="group relative p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all hover:shadow-md overflow-hidden"
 				>
-					<div class="absolute inset-0 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+					<div class="absolute inset-0 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 					<div class="relative z-10 flex items-start">
 						<div class="flex-shrink-0 mt-1 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center mr-4">
 							<svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

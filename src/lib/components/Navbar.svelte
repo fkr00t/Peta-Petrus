@@ -102,7 +102,7 @@
         {/if}
         
         <button 
-          on:click={confirmLogout} 
+          onclick={confirmLogout} 
           class="px-3 py-1 text-sm rounded bg-red-600 hover:bg-red-700 text-white disabled:opacity-70"
           disabled={isLoggingOut}
         >
@@ -120,7 +120,7 @@
         <a href="/register" class="px-3 py-1 text-sm rounded bg-gray-600 hover:bg-gray-700 text-white">Register</a>
       {/if}
       
-      <button on:click={toggleDarkMode} class="p-2 rounded-full hover:bg-primary-600 transition-colors duration-300" aria-label="Toggle dark mode">
+      <button onclick={toggleDarkMode} class="p-2 rounded-full hover:bg-primary-600 transition-colors duration-300" aria-label="Toggle dark mode">
         {#if isDarkMode}
           <!-- Ikon Matahari (Light Mode) -->
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -158,14 +158,14 @@
       
       <div class="mt-6 flex justify-end space-x-3">
         <button
-          on:click={cancelLogout}
+          onclick={cancelLogout}
           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
         >
           Batal
         </button>
         
         <button
-          on:click={handleLogout}
+          onclick={handleLogout}
           class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
           disabled={isLoggingOut}
         >

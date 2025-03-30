@@ -6,13 +6,12 @@
   export let onSubmit: (formData: FormData) => Promise<void>;
   export let onCancel: () => void;
 
-  // Penambahan fungsi untuk mengecek apakah koordinat tersedia
   const hasCoordinates = () => latitude !== null && longitude !== null;
 
   type Category = {
     id: string;
     name: string;
-    markerCount?: number; // Jumlah marker yang menggunakan kategori ini
+    markerCount?: number;
   }
 
   let title = '';
@@ -28,12 +27,9 @@
   let loading = true;
   let error = '';
   let success = '';
-
-  // Dialog konfirmasi
   let showConfirmDialog = false;
   let categoryToDelete: Category | null = null;
 
-  // Mengambil data kategori saat komponen dimuat
   onMount(async () => {
     try {
       const response = await fetch('/api/categories?includeCount=true');
@@ -49,7 +45,6 @@
     }
   });
 
-  // Fungsi untuk membuat kategori baru
   const createCategory = async () => {
     if (!newCategory.trim()) {
       error = 'Nama kategori tidak boleh kosong';
@@ -69,7 +64,7 @@
 
       if (response.ok) {
         const createdCategory = await response.json();
-        createdCategory.markerCount = 0; // Kategori baru belum digunakan
+        createdCategory.markerCount = 0;
         categories = [...categories, createdCategory];
         selectedCategoryId = createdCategory.id;
         newCategory = '';
@@ -89,7 +84,6 @@
     }
   };
 
-  // Fungsi untuk membersihkan semua form
   const clearForm = () => {
     title = '';
     description = '';
@@ -97,24 +91,19 @@
     imageUrl = '';
     url = '';
     selectedCategoryId = '';
-    
-    // Panggil onCancel untuk reset koordinat dan marker sementara di peta
     onCancel();
   };
 
-  // Fungsi untuk memunculkan dialog konfirmasi hapus
   const confirmDeleteCategory = (category: Category) => {
     categoryToDelete = category;
     showConfirmDialog = true;
   };
 
-  // Fungsi untuk menutup dialog konfirmasi
   const closeConfirmDialog = () => {
     showConfirmDialog = false;
     categoryToDelete = null;
   };
 
-  // Fungsi untuk menghapus kategori
   const deleteCategory = async () => {
     if (!categoryToDelete) return;
     
@@ -127,14 +116,10 @@
       });
 
       if (response.ok) {
-        // Hapus kategori dari daftar
         categories = categories.filter(category => category.id !== categoryId);
-        
-        // Reset selectedCategoryId jika kategori yang dihapus sedang dipilih
         if (selectedCategoryId === categoryId) {
           selectedCategoryId = '';
         }
-        
         success = 'Kategori berhasil dihapus';
         setTimeout(() => success = '', 3000);
       } else {
@@ -174,16 +159,12 @@
       formData.append('description', description);
       formData.append('latitude', latitude!.toString());
       formData.append('longitude', longitude!.toString());
-      
-      // Tambahkan field baru
       if (city) formData.append('city', city);
       if (imageUrl) formData.append('imageUrl', imageUrl);
       if (url) formData.append('url', url);
       formData.append('categoryId', selectedCategoryId);
 
       await onSubmit(formData);
-
-      // Reset form
       clearForm();
     } catch (err: unknown) {
       console.error('Error submitting marker:', err);
@@ -193,7 +174,6 @@
     }
   };
 
-  // Toggle tampilan form kategori baru
   const toggleCategoryForm = () => {
     isCreatingCategory = !isCreatingCategory;
     if (!isCreatingCategory) {
@@ -203,15 +183,13 @@
 </script>
 
 <div class="w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 my-4">
-  <!-- Header Form -->
   <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-t-xl">
     <h2 class="text-xl font-bold">Tambah Marker Baru</h2>
     <p class="text-emerald-100 text-sm mt-1">Lengkapi form berikut untuk menambahkan titik baru pada peta</p>
   </div>
 
-  <!-- Alert Error -->
   {#if error}
-    <div class="mx-6 mt-4 bg-red-100 dark:bg-red-900/40 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4 rounded-r-md flex items-start">
+    <div class="mx-6 mt-4 bg-red-100 dark:bg-red-900/40 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4 rounded-r-md flex items-start" role="alert">
       <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>
@@ -219,9 +197,8 @@
     </div>
   {/if}
 
-  <!-- Alert Success -->
   {#if success}
-    <div class="mx-6 mt-4 bg-emerald-100 dark:bg-emerald-900/40 border-l-4 border-emerald-500 text-emerald-700 dark:text-emerald-300 p-4 rounded-r-md flex items-start">
+    <div class="mx-6 mt-4 bg-emerald-100 dark:bg-emerald-900/40 border-l-4 border-emerald-500 text-emerald-700 dark:text-emerald-300 p-4 rounded-r-md flex items-start" role="alert">
       <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
       </svg>
@@ -230,11 +207,8 @@
   {/if}
 
   <form on:submit={handleSubmit} class="p-5">
-    <!-- Layout dua kolom untuk form di layar lebih besar -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <!-- Kolom kiri -->
       <div class="space-y-4">
-        <!-- Judul -->
         <div class="form-group">
           <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Judul <span class="text-red-500">*</span>
@@ -256,7 +230,6 @@
           </div>
         </div>
 
-        <!-- Deskripsi -->
         <div class="form-group">
           <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Deskripsi
@@ -277,7 +250,6 @@
           </div>
         </div>
 
-        <!-- Kota - Field Baru -->
         <div class="form-group">
           <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Kota/Kabupaten
@@ -293,70 +265,69 @@
               id="city"
               bind:value={city}
               placeholder="Nama kota atau kabupaten"
-              class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white transition-all duration-200"
+              class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-em SLOPEerald-500 dark:bg-gray-700 dark:text-white transition-all duration-200"
             />
           </div>
         </div>
 
-        <!-- Koordinat dalam grup -->
         <div class="form-group">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label for="coordinates" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Koordinat Lokasi
           </label>
           
-          {#if hasCoordinates()}
-            <div class="grid grid-cols-2 gap-4">
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+          <div id="coordinates">
+            {#if hasCoordinates()}
+              <div class="grid grid-cols-2 gap-4">
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    id="latitude"
+                    value={latitude!.toFixed(6)}
+                    class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-400 shadow-sm"
+                    readonly
+                  />
+                  <label for="latitude" class="absolute -bottom-5 left-0 text-xs text-gray-500 dark:text-gray-400">Latitude</label>
                 </div>
-                <input
-                  type="text"
-                  id="latitude"
-                  value={latitude!.toFixed(6)}
-                  class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-400 shadow-sm"
-                  readonly
-                />
-                <label for="latitude" class="absolute -bottom-5 left-0 text-xs text-gray-500 dark:text-gray-400">Latitude</label>
-              </div>
-              
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    id="longitude"
+                    value={longitude!.toFixed(6)}
+                    class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-400 shadow-sm"
+                    readonly
+                  />
+                  <label for="longitude" class="absolute -bottom-5 left-0 text-xs text-gray-500 dark:text-gray-400">Longitude</label>
                 </div>
-                <input
-                  type="text"
-                  id="longitude"
-                  value={longitude!.toFixed(6)}
-                  class="w-full pl-10 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-400 shadow-sm"
-                  readonly
-                />
-                <label for="longitude" class="absolute -bottom-5 left-0 text-xs text-gray-500 dark:text-gray-400">Longitude</label>
               </div>
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-7 italic">Koordinat diambil secara otomatis dari posisi marker yang dipilih pada peta</p>
-          {:else}
-            <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
-              <svg class="h-8 w-8 mx-auto text-gray-400 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Belum ada koordinat yang dipilih</p>
-              <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 italic">Klik pada peta untuk menentukan lokasi marker</p>
-            </div>
-          {/if}
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-7 italic">Koordinat diambil secara otomatis dari posisi marker yang dipilih pada peta</p>
+            {:else}
+              <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
+                <svg class="h-8 w-8 mx-auto text-gray-400 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Belum ada koordinat yang dipilih</p>
+                <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 italic">Klik pada peta untuk menentukan lokasi marker</p>
+              </div>
+            {/if}
+          </div>
         </div>
       </div>
 
-      <!-- Kolom kanan -->
       <div class="space-y-4">
-        <!-- Kategori -->
         <div class="form-group">
           <div class="flex justify-between items-center mb-1">
             <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -382,7 +353,6 @@
           </div>
 
           {#if isCreatingCategory}
-            <!-- Form untuk membuat kategori baru -->
             <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 shadow-inner">
               <div class="mb-3">
                 <label for="newCategory" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Kategori Baru</label>
@@ -422,7 +392,6 @@
               </button>
             </div>
           {:else}
-            <!-- Daftar kategori yang ada -->
             {#if categories.length > 0}
               <div class="mt-2 space-y-2 max-h-40 overflow-y-auto p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
                 {#each categories as category}
@@ -452,6 +421,7 @@
                       <button 
                         type="button"
                         title="Hapus kategori"
+                        aria-label="Hapus kategori {category.name}"
                         class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none ml-2 flex-shrink-0"
                         on:click|stopPropagation={() => confirmDeleteCategory(category)}
                       >
@@ -472,7 +442,6 @@
           {/if}
         </div>
 
-        <!-- URL Gambar -->
         <div class="form-group">
           <label for="imageUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             URL Gambar
@@ -494,7 +463,6 @@
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Masukkan URL gambar yang relevan (opsional)</p>
         </div>
 
-        <!-- URL Tautan -->
         <div class="form-group">
           <label for="url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             URL Tautan
@@ -518,7 +486,6 @@
       </div>
     </div>
     
-    <!-- Tombol aksi -->
     <div class="flex justify-end items-center space-x-3 pt-5 mt-4 border-t border-gray-200 dark:border-gray-700">
       <button
         type="button"
@@ -558,7 +525,6 @@
   </form>
 </div>
 
-<!-- Dialog Konfirmasi Hapus -->
 {#if showConfirmDialog && categoryToDelete}
   <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full mx-4 overflow-hidden transform transition-all">
@@ -603,24 +569,18 @@
 {/if}
 
 <style>
-  /* Fokus dan hover efek yang lebih halus */
-  input:focus, textarea:focus, select:focus {
+  input:focus, textarea:focus {
     box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
   }
   
-  /* Transisi yang lebih halus */
   .form-group {
     transition: all 0.3s ease;
   }
   
-  /* Select dengan custom arrow */
-  .select-with-arrow {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-    background-position: right 0.75rem center;
-    background-size: 1.25rem;
+  .animate-spin {
+    animation: spin 1s linear infinite;
   }
   
-  /* Animasi loading */
   @keyframes spin {
     from {
       transform: rotate(0deg);
@@ -628,9 +588,5 @@
     to {
       transform: rotate(360deg);
     }
-  }
-  
-  .animate-spin {
-    animation: spin 1s linear infinite;
   }
 </style>
