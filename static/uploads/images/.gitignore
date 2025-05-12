@@ -1,0 +1,5 @@
+# Abaikan semua file di direktori uploads/images
+*
+# Kecuali file .gitkeep dan .gitignore
+!.gitkeep
+!.gitignore 
