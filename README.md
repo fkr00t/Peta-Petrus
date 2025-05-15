@@ -1,6 +1,6 @@
 # Peta Petrus
 
-Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna untuk menjelajahi dan mengelola titik-titik lokasi pada peta. Aplikasi ini menyediakan antarmuka yang intuitif untuk memvisualisasikan data geografis, dengan fokus pada penandaan lokasi pelanggaran HAM beserta informasi detailnya.
+Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna untuk menjelajahi dan mengelola titik-titik lokasi peristiwa Penembakan Misterius (Petrus) pada peta. Aplikasi ini menyediakan antarmuka yang intuitif untuk memvisualisasikan data geografis tentang peristiwa-peristiwa historis tersebut, dengan fokus pada dokumentasi dan transparansi informasi.
 
 ## Daftar Isi
 - [Fitur Utama](#fitur-utama)
@@ -13,6 +13,7 @@ Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna u
 - [Model Data](#model-data)
 - [Keamanan](#keamanan)
 - [Deployment](#deployment)
+- [Tim Pengembang](#tim-pengembang)
 - [Kontribusi](#kontribusi)
 - [Lisensi](#lisensi)
 
@@ -44,7 +45,6 @@ Peta Petrus adalah aplikasi web pemetaan interaktif yang memungkinkan pengguna u
 - **Kontrol Akses**: Pembatasan fitur berdasarkan peran pengguna (RBAC)
 - **Validasi Input**: Validasi data di client dan server untuk keamanan
 - **Sanitasi Input**: Sanitasi komprehensif semua input pengguna menggunakan DOMPurify untuk mencegah XSS dan injeksi
-- **Validasi URL**: Validasi URL khusus untuk mencegah URL berbahaya
 
 ## Teknologi yang Digunakan
 
@@ -90,6 +90,7 @@ peta-petrus/
 │   ├── lib/                # Kode yang dapat digunakan kembali
 │   │   ├── components/     # Komponen UI Svelte
 │   │   │   ├── Map.svelte  # Komponen peta utama
+│   │   │   ├── Navbar.svelte # Navigasi utama aplikasi
 │   │   │   ├── Turnstile.svelte # Komponen captcha Cloudflare
 │   │   │   └── ...
 │   │   ├── server/         # Kode server-side
@@ -104,18 +105,54 @@ peta-petrus/
 │   │   ├── +layout.svelte  # Layout aplikasi umum
 │   │   ├── +page.svelte    # Halaman utama dengan peta
 │   │   ├── login/          # Halaman login
-│   │   ├── register/       # Halaman register
+│   │   ├── team/           # Halaman tim pengembang
 │   │   ├── admin/          # Halaman admin
+│   │   │   ├── markers/    # Pengelolaan marker
+│   │   │   ├── users/      # Pengelolaan pengguna
+│   │   │   └── ...
 │   │   └── api/            # API endpoints
 │   │       ├── auth/       # Endpoint autentikasi
 │   │       ├── markers/    # Endpoint untuk marker
+│   │       ├── users/      # Endpoint untuk pengguna
 │   │       └── categories/ # Endpoint untuk kategori
 │   ├── app.html            # Template HTML utama
 │   └── app.css             # Style global
 ├── static/                 # Asset statis
+│   ├── images/             # Gambar dan icon
+│   ├── team/               # Foto tim pengembang
+│   └── ...
 ├── .env.example            # Contoh konfigurasi environment
 └── package.json            # Dependensi dan skrip
 ```
+
+## Alur Kerja Aplikasi
+
+### Alur Autentikasi
+1. **Login User**
+   - User mengakses halaman login
+   - Memasukkan username dan password
+   - Sistem memverifikasi kredensial
+   - Jika valid, sistem menerbitkan access token dan refresh token
+   - User diarahkan ke halaman yang sesuai dengan perannya
+
+2. **Registrasi User (Admin Only)**
+   - Hanya admin yang dapat menambahkan user baru
+   - Admin mengakses halaman admin/users
+   - Mengisi formulir dengan detail user baru
+   - Sistem memverifikasi data dan membuat akun
+
+### Alur Pembuatan Marker
+1. **Penambahan Marker (Admin)**
+   - Admin login ke sistem
+   - Mengakses halaman peta atau admin/markers
+   - Klik pada lokasi di peta atau tambahkan melalui form
+   - Mengisi data marker (judul, deskripsi, kategori, dll)
+   - Sistem menyimpan marker baru
+
+2. **Penampilan Marker (Semua User)**
+   - Marker ditampilkan pada peta
+   - User dapat memfilter marker berdasarkan kategori
+   - Klik pada marker menampilkan popup dengan detail
 
 ## Panduan Instalasi
 
@@ -137,6 +174,8 @@ peta-petrus/
 2. **Install dependensi**
    ```bash
    npm install
+   # atau jika menggunakan pnpm
+   pnpm install
    ```
 
 3. **Konfigurasi environment**
@@ -157,6 +196,8 @@ peta-petrus/
 5. **Jalankan aplikasi dalam mode development**
    ```bash
    npm run dev
+   # atau
+   pnpm dev
    ```
    
    Aplikasi akan tersedia di `http://localhost:5173`
@@ -172,6 +213,8 @@ DATABASE_URL="mysql://username:password@localhost:3306/database_name"
 # JWT Authentication
 ACCESS_TOKEN_SECRET="your_strong_random_secret"
 ACCESS_TOKEN_EXPIRES_IN="15m"
+REFRESH_TOKEN_SECRET="your_strong_random_refresh_secret"
+REFRESH_TOKEN_EXPIRES_IN="7d"
 
 # CSRF Protection
 CSRF_SECRET="your_strong_random_csrf_secret"
@@ -203,14 +246,6 @@ NODE_ENV="development"
    PUBLIC_TURNSTILE_SITE_KEY="your_site_key"
    ```
 
-### Mode Development vs Production
-
-Untuk deployment production:
-1. Ubah mode Turnstile di dashboard Cloudflare dari "Testing Only" ke "Managed"
-2. Dapatkan kunci produksi baru dan perbarui di `.env`
-3. Ubah `NODE_ENV="production"` di `.env`
-4. Bangun aplikasi dengan `npm run build`
-
 ## Penggunaan Aplikasi
 
 ### Bagi Pengguna Umum
@@ -224,11 +259,14 @@ Untuk deployment production:
    - Gunakan kotak pencarian untuk mencari marker berdasarkan kata kunci
    - Pilih kategori dari dropdown filter untuk memfilter marker
 
+3. **Melihat Informasi Tim**
+   - Akses halaman `/team` untuk melihat informasi tentang tim pengembang
+
 ### Bagi Administrator
 
 1. **Login ke Dashboard Admin**
    - Akses `/login` dan masukkan kredensial admin
-   - Setelah login, akses `/admin/dashboard`
+   - Setelah login, akses halaman admin
 
 2. **Mengelola Marker**
    - Tambah marker baru dengan mengklik pada peta
@@ -238,13 +276,18 @@ Untuk deployment production:
 3. **Mengelola Kategori**
    - Tambah, edit, dan hapus kategori untuk marker
 
+4. **Mengelola Pengguna**
+   - Tambah pengguna baru dengan mengisi formulir
+   - Edit peran pengguna
+   - Nonaktifkan atau hapus pengguna
+
 ## API Endpoints
 
 Aplikasi menyediakan API RESTful berikut:
 
 ### Autentikasi
 - `POST /api/auth/login` - Login dan mendapatkan token
-- `POST /api/auth/register` - Registrasi pengguna baru
+- `POST /api/auth/register` - Registrasi pengguna baru (admin only)
 - `POST /api/auth/logout` - Logout dan invalidasi token
 - `POST /api/auth/refresh` - Refresh access token
 
@@ -258,7 +301,14 @@ Aplikasi menyediakan API RESTful berikut:
 ### Kategori
 - `GET /api/categories` - Mendapatkan semua kategori
 - `POST /api/categories` - Menambah kategori baru (admin only)
+- `PUT /api/categories/:id` - Mengupdate kategori (admin only)
 - `DELETE /api/categories/:id` - Menghapus kategori (admin only)
+
+### Pengguna
+- `GET /api/users` - Mendapatkan semua pengguna (admin only)
+- `POST /api/users` - Menambah pengguna baru (admin only)
+- `PUT /api/users/:id` - Mengupdate informasi pengguna (admin only)
+- `DELETE /api/users/:id` - Menghapus pengguna (admin only)
 
 ## Model Data
 
@@ -341,18 +391,10 @@ model RefreshToken {
 - **Rate Limiting**: Pembatasan percobaan login untuk mencegah serangan brute force
 - **Role-Based Access Control**: Pembatasan akses berdasarkan peran pengguna
 - **DOMPurify Sanitization**: Implementasi komprehensif sanitasi input menggunakan DOMPurify
-  - Sanitasi semua input pengguna (login, register, pencarian, form marker, dll)
+  - Sanitasi semua input pengguna
   - Pencegahan serangan XSS (Cross-Site Scripting)
   - Validasi URL khusus untuk mencegah URL berbahaya
   - Sanitasi rekursif untuk objek kompleks
-  - Penerapan helper functions untuk sanitasi yang konsisten: `sanitizeString()`, `sanitizeFormData()`, dll
-
-### Lapisan Keamanan Input
-1. **Form Validation**: Validasi dasar di client-side
-2. **DOMPurify Sanitization**: Sanitasi semua input untuk mencegah injeksi
-3. **Type Checking**: Validasi tipe data menggunakan TypeScript
-4. **URL Validation**: Validasi khusus untuk URL menggunakan `isValidUrl()`
-5. **Server-side Validation**: Validasi tambahan di server
 
 ### Rekomendasi untuk Production
 - Gunakan HTTPS untuk semua komunikasi
@@ -360,7 +402,6 @@ model RefreshToken {
 - Gunakan audit trail untuk operasi sensitif
 - Aktifkan mode "Managed" untuk Cloudflare Turnstile di lingkungan produksi
 - Jalankan regular security audit dan pembaruan dependensi
-- Terapkan prepared statements untuk semua query database
 - Aktifkan rate limiting di server produksi
 
 ## Deployment
@@ -397,6 +438,16 @@ npm run build
 # Gunakan Node.js untuk menjalankan aplikasi
 node build
 ```
+
+## Tim Pengembang
+
+Proyek Peta Petrus dikembangkan oleh tim yang berkomitmen untuk mendokumentasikan peristiwa Penembakan Misterius (Petrus) secara transparan dan akurat.
+
+### Struktur Tim
+- **Koordinator Proyek**: Bertanggung jawab atas koordinasi keseluruhan proyek dan memastikan tujuan dokumentasi tercapai.
+- **Tim Pengembang**: Membangun dan memelihara platform digital untuk dokumentasi dan visualisasi data peristiwa Petrus.
+
+Kunjungi halaman [Tim Kami](/team) untuk informasi lebih lanjut tentang anggota tim.
 
 ## Kontribusi
 
