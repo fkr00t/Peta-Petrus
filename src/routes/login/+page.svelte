@@ -383,10 +383,7 @@
         </form>
         
         <div class="mt-8 text-center">
-          <p class="text-gray-600 dark:text-gray-400">Belum punya akun?</p>
-          <a href="/register" class="mt-1 inline-block font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 focus:ring-2 focus:ring-primary-400">
-            Daftar sekarang
-          </a>
+          <p class="text-gray-600 dark:text-gray-400">Untuk membuat akun, silakan hubungi admin</p>
         </div>
       {/if}
     </div>

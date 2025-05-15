@@ -7,19 +7,20 @@
       name: 'Koordinator Proyek',
       role: 'Koordinator',
       bio: 'Bertanggung jawab atas koordinasi keseluruhan proyek dan memastikan tujuan dokumentasi tercapai.',
-      image: '/images/team/coordinator.jpg'
+      image: '/team/Ketua.jpg'
     },
-    {
-      name: 'Tim Riset',
-      role: 'Peneliti',
-      bio: 'Melakukan penelitian mendalam tentang peristiwa Petrus, mengumpulkan data historis, dan memverifikasi informasi.',
-      image: ''
-    },
+    // {
+    //   name: 'Tim Riset',
+    //   role: 'Peneliti',
+    //   bio: 'Melakukan penelitian mendalam tentang peristiwa Petrus, mengumpulkan data historis, dan memverifikasi informasi.',
+    //   image: '/static/team/researcher.jpg'
+    // },
+    
     {
       name: 'Tim Pengembang',
       role: 'Developer',
       bio: 'Membangun dan memelihara platform digital untuk dokumentasi dan visualisasi data peristiwa Petrus.',
-      image: '/static/team/developer.jpg'
+      image: '/team/Developer.jpg'
     }
   ];
   
@@ -53,9 +54,9 @@
       </p>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="flex flex-wrap justify-center gap-8 mx-auto">
       {#each teamMembers as member}
-        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300">
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 w-full max-w-sm">
           <div class="h-48 overflow-hidden">
             <img 
               src={member.image} 

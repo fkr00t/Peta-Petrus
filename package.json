@@ -15,7 +15,9 @@
 		"prisma:migrate": "prisma migrate dev",
 		"prisma:studio": "prisma studio",
 		"prisma:generate": "prisma generate",
-		"prisma:seed": "tsx prisma/seed.ts"
+		"prisma:seed": "tsx prisma/seed.ts",
+		"generate:sitemap": "node scripts/generate-sitemap.js",
+		"build:prod": "npm run generate:sitemap && vite build"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -32,6 +34,7 @@
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
+		"glob": "^10.3.10",
 		"globals": "^16.0.0",
 		"postcss": "^8.5.3",
 		"prettier": "^3.4.2",

@@ -9,6 +9,11 @@ const prisma = new PrismaClient();
 
 export async function POST(event: RequestEvent) {
   try {
+    // Cek apakah pengguna yang melakukan request adalah admin
+    if (!event.locals.user || event.locals.user.role !== 'ADMIN') {
+      return json({ message: 'Akses ditolak' }, { status: 403 });
+    }
+    
     const { username, password, csrf, captchaToken } = await event.request.json();
     
     // Validasi CSRF token
@@ -19,14 +24,12 @@ export async function POST(event: RequestEvent) {
       return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
     }
     
-    // Validasi Captcha
-    if (!captchaToken) {
-      return json({ message: 'Verifikasi captcha diperlukan' }, { status: 400 });
-    }
-    
-    const isValidCaptcha = await verifyTurnstileToken(captchaToken, event.getClientAddress());
-    if (!isValidCaptcha) {
-      return json({ message: 'Verifikasi captcha tidak valid' }, { status: 400 });
+    // Validasi Captcha - opsional untuk admin
+    if (captchaToken) {
+      const isValidCaptcha = await verifyTurnstileToken(captchaToken, event.getClientAddress());
+      if (!isValidCaptcha) {
+        return json({ message: 'Verifikasi captcha tidak valid' }, { status: 400 });
+      }
     }
     
     // Validasi input

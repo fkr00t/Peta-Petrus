@@ -51,10 +51,10 @@
     let toastMessage: string = $state('');
     let toastType: 'success' | 'error' | 'info' = $state('info');
     let toastTimeout: number | null = $state(null);
-
+    
     // Banner state
     let showInfoBanner: boolean = $state(true);
-  
+
     // Fungsi untuk menampilkan toast
     function showToastMessage(message: string, type: 'success' | 'error' | 'info' = 'info') {
       // Hapus timeout yang ada jika ada
@@ -72,7 +72,8 @@
         showToast = false;
       }, 3000) as unknown as number;
     }
-
+  
+    // Fungsi untuk menutup banner informasi
     function closeInfoBanner() {
       showInfoBanner = false;
     }
@@ -210,72 +211,117 @@
 <svelte:head>
   <title>Peta Ingatan "Petrus" - Dokumentasi Interaktif Pelanggaran HAM</title>
   <meta name="description" content="Peta interaktif dokumentasi peristiwa Penembakan Misterius (Petrus) yang diakui sebagai pelanggaran HAM berat masa lalu oleh Presiden Joko Widodo." />
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://petapetrus.com" />
+  
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:title" content="Peta Ingatan 'Petrus' - Dokumentasi Interaktif Pelanggaran HAM" />
+  <meta property="og:description" content="Peta interaktif dokumentasi peristiwa Penembakan Misterius (Petrus) yang diakui sebagai pelanggaran HAM berat masa lalu oleh Presiden Joko Widodo." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://petapetrus.com" />
+  <meta property="og:image" content="https://petapetrus.com/images/og-image.jpg" />
+  
+  <!-- Structured Data Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Peta Ingatan Petrus",
+    "url": "https://petapetrus.com",
+    "description": "Peta interaktif dokumentasi peristiwa Penembakan Misterius (Petrus) yang diakui sebagai pelanggaran HAM berat masa lalu oleh Presiden Joko Widodo.",
+    "potentialAction": {
+      "@type": "ViewAction",
+      "target": "https://petapetrus.com"
+    }
+  }
+  </script>
+  
+  <!-- Structured Data untuk MapLocation -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Lokasi Kasus Petrus",
+    "description": "Kumpulan data lokasi-lokasi terkait kasus Penembakan Misterius (Petrus) di Indonesia yang merupakan pelanggaran HAM berat masa lalu.",
+    "keywords": ["Petrus", "Penembakan Misterius", "Pelanggaran HAM", "Sejarah Indonesia", "Hak Asasi Manusia"],
+    "creator": {
+      "@type": "Organization",
+      "name": "Tim Peta Petrus"
+    },
+    "temporalCoverage": "1982-1985",
+    "spatialCoverage": {
+      "@type": "Place",
+      "name": "Indonesia"
+    }
+  }
+  </script>
 </svelte:head>
 
-<div class="flex flex-col h-full w-full bg-gray-50 dark:bg-gray-900 pt-[53px]">
-  <!-- Info Banner - Diubah menjadi fixed di bawah navbar -->
+<div class="flex flex-col h-screen w-full bg-gray-50 dark:bg-gray-900">
+  <!-- Navbar padding placeholder - sesuaikan dengan tinggi navbar Anda -->
+  <div class="h-[53px] flex-shrink-0"></div>
+  
+  <!-- Banner informasi di bawah navbar -->
   {#if showInfoBanner}
-    <div class="fixed top-[60px] left-0 right-0 z-30 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-1.5 shadow-md">
-      <div class="max-w-6xl mx-auto">
-        <!-- Konten Banner dengan spacing yang lebih kompak -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 text-xs text-gray-600 dark:text-gray-300">
-          <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="bg-amber-50 dark:bg-gray-800 text-gray-800 dark:text-white border-t border-amber-100 dark:border-gray-700 pr-5">
+      <div class="container mx-auto px-4 py-2.5 text-sm flex items-center justify-between">
+        <div class="flex items-center gap-8 overflow-x-auto whitespace-nowrap hide-scrollbar">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 dark:text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            <span>
-              <span class="font-medium">Penembakan Misterius (Petrus)</span> adalah peristiwa pelanggaran HAM masa lalu, diakui dalam Pidato Presiden Joko Widodo 11 Januari 2023.
-            </span>
+            <span>Penembakan Misterius (Petrus) adalah peristiwa pelanggaran HAM masa lalu, diakui dalam Pidato Presiden Joko Widodo 11 Januari 2023.</span>
           </div>
           
-          <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 dark:text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-1m-4-1v8m0 0l-3-3m3 3l3-3" />
             </svg>
             <span>Projek ini disusun berdasarkan berkas dari penyintas Petrus.</span>
           </div>
           
-          <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 dark:text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <span>Seluruh pengerjaan dilakukan secara kolektif dan swadaya tanpa donor/funding.</span>
           </div>
           
-          <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 dark:text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
             <span>Laman ini untuk kepentingan kemanusiaan dan pendidikan, bukan komersil.</span>
           </div>
         </div>
         
-        <!-- Tombol tutup di kanan tengah -->
-        <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
-          <button 
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors bg-gray-100 dark:bg-gray-700 rounded-full p-1" 
-            onclick={closeInfoBanner}
-            aria-label="Tutup informasi"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
-        </div>
+        <!-- Tombol tutup di pojok kanan -->
+        <button 
+          class="text-amber-600 hover:text-amber-800 dark:text-gray-300 dark:hover:text-white transition-colors flex-shrink-0 ml-2" 
+          on:click={closeInfoBanner}
+          aria-label="Tutup informasi"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
       </div>
     </div>
-    
-    <!-- Spacer untuk kompensasi banner fixed -->
-    <div class="h-[80px]"></div>
   {/if}
-  
-  <!-- Container untuk peta dengan tampilan modern -->
-  <div class="relative flex-grow w-full">
+
+  <!-- Container untuk peta dengan tampilan modern - flex-grow untuk mengisi ruang yang tersisa -->
+  <div class="relative flex-grow w-full flex flex-col">
+    <!-- Header utama untuk SEO - visually hidden tapi terdeteksi oleh mesin pencari -->
+    <header class="sr-only">
+      <h1>Peta Ingatan Peristiwa Penembakan Misterius (Petrus) - Dokumentasi Pelanggaran HAM di Indonesia</h1>
+    </header>
+    
     <!-- Loading state overlay -->
     {#if isLoading}
       <div class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-75 z-10">
         <div class="text-center">
-          <div class="spinner-loading"></div>
+          <div class="spinner-loading" aria-hidden="true"></div>
           <p class="mt-2 text-primary-700 dark:text-primary-400">Memuat peta...</p>
         </div>
       </div>
@@ -285,7 +331,7 @@
     {#if showToast}
       <div class="fixed top-4 right-4 z-50 fade-in">
         <div class="{toastType === 'success' ? 'bg-green-600' : toastType === 'error' ? 'bg-red-600' : 'bg-blue-600'} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
-          <button onclick={() => showToast = false} class="text-white hover:text-gray-200" aria-label="Tutup notifikasi">
+          <button on:click={() => showToast = false} class="text-white hover:text-gray-200" aria-label="Tutup notifikasi">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
@@ -295,35 +341,11 @@
       </div>
     {/if}
 
-    <!-- Instruksi Penggunaan Peta - Floating card di pojok kiri atas -->
-    <!-- <div class="absolute top-4 left-4 z-10 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-xs">
-      <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Petunjuk Penggunaan</h3>
-      <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
-        <li class="flex items-start gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-          <span>Klik pada marker untuk melihat detail lokasi</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-          <span>Gunakan ikon + dan - untuk memperbesar/perkecil peta</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-          <span>Geser peta untuk melihat area lain</span>
-        </li>
-      </ul>
-    </div> -->
-
-    <!-- Peta utama -->
-    <div class="w-full h-[calc(100vh-130px)] md:h-[calc(100vh-150px)] flex items-center justify-center">
+    <!-- Peta utama - menggunakan flex-grow untuk mengisi ruang tersisa -->
+    <section class="flex-grow w-full flex items-center justify-center" aria-label="Peta lokasi kasus Petrus">
+      <h2 class="sr-only">Visualisasi Peta Interaktif Petrus</h2>
       <Map markers={filteredMarkers} isAdmin={false} onAddMarker={handleMapClick} />
-    </div>
+    </section>
 
     <!-- Form marker modal -->
     {#if showMarkerForm}
@@ -339,8 +361,8 @@
       <!-- Overlay untuk background saat form terbuka -->
       <div 
         class="overlay" 
-        onclick={cancelAddMarker} 
-        onkeydown={(e) => e.key === 'Escape' && cancelAddMarker()}
+        on:click={cancelAddMarker} 
+        on:keydown={(e) => e.key === 'Escape' && cancelAddMarker()}
         role="button"
         tabindex="0"
         aria-label="Tutup form marker"
@@ -363,7 +385,7 @@
   .spinner-loading {
     display: inline-block;
     width: 2.5rem;
-    height: 2.5rem;
+    height: 2.5rem; 
     border: 4px solid rgba(79, 70, 229, 0.2);
     border-radius: 50%;
     border-top-color: rgb(79, 70, 229);
@@ -384,11 +406,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
   
-  /* Tambahkan padding pada body untuk kompensasi navbar fixed */
-  :global(body) {
-    padding-top: 0; /* Hapus padding-top global */
-  }
-  
   /* Pastikan container utama memiliki tinggi penuh */
   :global(html, body, #app, #app > div) {
     height: 100%;
@@ -407,15 +424,25 @@
     /* Pengaturan untuk mobile */
     :global(.leaflet-control-zoom) {
       margin-left: 10px !important;
-      margin-bottom: 60px !important;
+      margin-bottom: 10px !important;
     }
   }
 
   @media (min-width: 641px) and (max-width: 1024px) {
     /* Pengaturan untuk tablet */
     :global(.leaflet-control-zoom) {
-      margin-left: 15px !important;
-      margin-bottom: 80px !important;
+      margin-left: 10px !important;
+      margin-bottom: 10px !important;
     }
+  }
+
+  /* Hide scrollbar untuk banner info */
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* untuk Internet Explorer dan Edge */
+    scrollbar-width: none;  /* untuk Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* untuk Chrome, Safari dan Opera */
   }
 </style>

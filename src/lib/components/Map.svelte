@@ -1008,8 +1008,8 @@
     </div>
   {/if}
 
-  <!-- Map Controls - diubah menjadi horizontal -->
-  <div class="map-controls-horizontal {controlsPosition === 'middle' ? 'position-middle' : ''}">
+  <!-- Map Controls - diubah menjadi vertikal -->
+  <div class="map-controls-vertical {controlsPosition === 'middle' ? 'position-middle' : ''}">
     <!-- Filter Button -->
     {#if !hideFilterButton}
       <button 
@@ -1023,7 +1023,6 @@
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
           </svg>
         </span>
-        <span class="control-text">Filter</span>
         {#if selectedCategoryId}
           <span class="control-active-badge"></span>
         {/if}
@@ -1044,10 +1043,9 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </span>
-        <span class="control-text">Cari</span>
       </button>
       
-      <!-- Reset Button (NEW) -->
+      <!-- Reset Button -->
       <button 
         class="control-btn reset-map-btn" 
         on:click|stopPropagation={resetMapView} 
@@ -1062,7 +1060,6 @@
             <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path>
           </svg>
         </span>
-        <span class="control-text">Reset</span>
       </button>
     {/if}
   </div>
@@ -1168,7 +1165,7 @@
 </div>
 
 <style>
-  .map-container {
+  .map-container {  
     height: 100%;
     width: 100%;
     min-height: 400px; /* Lebih kecil untuk mendukung layar kecil */
@@ -1407,23 +1404,21 @@
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   }
   
-  /* Map Controls Style - Horizontal Layout */
-  .map-controls-horizontal {
+  /* Map Controls Style - Vertical Layout */
+  .map-controls-vertical {
     position: absolute;
-    bottom: 10px;  /* Lebih dekat ke bawah */
-    right: 10px;   /* Tepat di pojok kanan */
+    bottom: 10px;
+    right: 10px;
     z-index: 1000;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 8px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
+    background-color: transparent;
     padding: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
   /* Posisi alternatif untuk kontrol (di tengah kanan) */
-  .map-controls-horizontal.position-middle {
+  .map-controls-vertical.position-middle {
     bottom: 70px; /* Sedikit ke atas jika diatur di posisi tengah */
   }
   
@@ -1435,49 +1430,27 @@
     border: none;
     border-radius: 4px;
     padding: 8px;
-    height: 40px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    box-shadow: none;
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
   }
   
   .control-btn:hover {
-    background: #f8f9fa;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    background: #f3f4f6;
+    box-shadow: none;
   }
   
   .control-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0;
   }
   
   .control-text {
     display: none;
-  }
-  
-  @media (min-width: 768px) {
-    .map-controls-horizontal {
-      padding: 8px;
-    }
-    
-    .control-btn {
-      padding: 8px 12px;
-      width: auto;
-      gap: 6px;
-    }
-    
-    .control-text {
-      display: inline;
-      font-size: 13px;
-      font-weight: 500;
-    }
-    
-    .control-icon {
-      margin-right: 4px;
-    }
   }
   
   .control-active-badge {
@@ -1490,38 +1463,41 @@
     background-color: #ef4444;
   }
   
-  /* Control Panel Style - Panel di atas tombol kontrol */
+  /* Control Panel Style - Panel di sebelah kanan tombol kontrol */
   .control-panel {
     position: absolute;
-    bottom: 70px; /* Lebih jauh ke atas dari tombol kontrol */
-    right: 10px;
+    bottom: 10px;
+    right: 60px; /* Posisi di sebelah kanan tombol kontrol */
     background: white;
     border-radius: 8px;
-    width: 250px; /* Lebar yang lebih konsisten */
+    width: 250px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     z-index: 1000;
-    max-height: 50vh; /* Ukuran maksimum yang sedikit lebih kecil */
+    max-height: 50vh;
     display: flex;
     flex-direction: column;
-    transform-origin: bottom right;
-    animation: panelAppear 0.2s ease-out;
   }
   
   /* Posisi alternatif untuk panel kontrol */
   .control-panel.position-middle {
-    bottom: 130px; /* Lebih jauh dari tombol kontrol di posisi tengah */
+    bottom: 70px;
   }
   
   @keyframes panelAppear {
     from {
       opacity: 0;
-      transform: translateY(10px) scale(0.98);
+      transform: translateX(10px);
     }
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateX(0);
     }
+  }
+  
+  /* Panel untuk filter dan search */
+  .filter-panel, .search-panel {
+    animation: panelAppear 0.2s ease-out;
   }
   
   .panel-header {

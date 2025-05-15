@@ -1,0 +1,13 @@
+# robots.txt for Peta Petrus
+
+User-agent: *
+Allow: /
+
+# Disallow admin dan area terbatas lainnya
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard/
+
+# Sitemap
+Sitemap: https://petapetrus.com/sitemap.xml 

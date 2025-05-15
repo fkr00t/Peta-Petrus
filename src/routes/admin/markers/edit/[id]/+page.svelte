@@ -602,7 +602,7 @@
   <div class="mb-4">
     <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Marker</h1>
     <p class="text-gray-600 dark:text-gray-400">Ubah informasi marker pada peta</p>
-  </div>
+      </div>
 
   <!-- Toast Notification -->
   {#if showNotification}
@@ -634,20 +634,20 @@
         
         <div class="flex-1">
           <p class="font-medium">{notificationMessage}</p>
-        </div>
+    </div>
         
         <button
-          type="button"
+        type="button"
           class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-current p-1.5 inline-flex items-center justify-center h-8 w-8 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
           onclick={() => showNotification = false}
           aria-label="Close"
-        >
+      >
           <span class="sr-only">Tutup</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+        </svg>
         </button>
-      </div>
+    </div>
     </div>
   {/if}
 
@@ -656,11 +656,11 @@
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-r" role="alert">
       <div class="flex">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>{error}</span>
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>{error}</span>
       </div>
     </div>
   {/if}
@@ -670,9 +670,9 @@
       <div class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-        <span>{success}</span>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{success}</span>
         {#if isRedirecting}
           <div class="ml-2 inline-block">
             <div class="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
@@ -686,14 +686,14 @@
   <div class="flex flex-col gap-6">
     <!-- Peta dengan ukuran fixed -->
     <div class="w-full relative flex justify-center items-center" style="height: 60vh;">
-      {#if isLoading}
+    {#if isLoading}
         <div class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
           <div class="text-center">
             <div
               class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-emerald-500 border-r-transparent"
             ></div>
             <p class="mt-2 text-emerald-700">Memuat data marker...</p>
-          </div>
+      </div>
         </div>
       {/if}
     
@@ -701,27 +701,27 @@
         <div
           class="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
         >
-          <p>{error}</p>
+        <p>{error}</p>
           <button type="button" onclick={() => goto('/admin/markers/manage')} class="mt-2 text-red-700 font-medium hover:underline">
-            Kembali ke Daftar Marker
-          </button>
-        </div>
+          Kembali ke Daftar Marker
+        </button>
+      </div>
       {/if}
     
       <!-- Peta dengan border dan shadow -->
       <div class="w-full h-full border rounded-lg overflow-hidden shadow-md flex justify-center items-center">
-        <Map 
-          markers={markers} 
-          isAdmin={true} 
-          onAddMarker={handleMapClick} 
-          on:mapInit={handleMapInit}
+      <Map 
+        markers={markers} 
+        isAdmin={true} 
+        onAddMarker={handleMapClick} 
+        on:mapInit={handleMapInit}
           useBroadView={true} 
           hideControls={false} 
           hideFilterButton={true}
           controlsPosition="bottom"
-        />
+      />
       </div>
-    </div>
+  </div>
 
     <!-- Informasi koordinat yang dipilih -->
     {#if latitude && longitude}
@@ -785,7 +785,7 @@
               {description ? description.length : 0}/65000 karakter
             </div>
           </div>
-
+          
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label for="latitude" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Latitude</label>
@@ -924,7 +924,7 @@
                       </p>
                       <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP (Maks. 2MB)</p>
                     </div>
-                    <input 
+            <input
                       id="imageUpload" 
                       type="file" 
                       accept="image/png, image/jpeg, image/webp" 
@@ -932,7 +932,7 @@
                       onchange={handleImageChange}
                     />
                   </label>
-                </div>
+          </div>
               {/if}
               
               {#if imageUploadError}
@@ -996,7 +996,7 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
-
+  
   /* Notification animations */
   @keyframes notification-in {
     0% {

@@ -96,9 +96,9 @@ function applySecurityHeaders(response: Response, pathname?: string): Response {
     isProduction 
       ? "script-src 'self' 'unsafe-inline' https://unpkg.com https://nominatim.openstreetmap.org https://challenges.cloudflare.com" 
       : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://nominatim.openstreetmap.org https://challenges.cloudflare.com",
-    "style-src 'self' 'unsafe-inline' https://unpkg.com https://challenges.cloudflare.com",
+    "style-src 'self' 'unsafe-inline' https://unpkg.com https://challenges.cloudflare.com https://fonts.googleapis.com",
     "img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com blob:",
-    "font-src 'self'",
+    "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://nominatim.openstreetmap.org https://challenges.cloudflare.com" + (isProduction ? "" : " ws://localhost:*"),
     "frame-src 'self' https://challenges.cloudflare.com",
     "frame-ancestors 'self'",
