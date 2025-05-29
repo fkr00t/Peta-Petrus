@@ -318,7 +318,7 @@
         Tambah Marker
       </a>
       
-      <a href="/admin/security" class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-[#e9effd] dark:hover:bg-[#1c4fd0]/20 rounded-lg mb-1">
+      <a href="/admin/settings/security" class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-[#e9effd] dark:hover:bg-[#1c4fd0]/20 rounded-lg mb-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-[#2463EB] dark:text-[#5b8bef]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>

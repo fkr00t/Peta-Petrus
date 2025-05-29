@@ -36,21 +36,22 @@ export const DELETE: RequestHandler = async ({ params, locals, request, cookies 
       return json({ message: 'Validasi keamanan gagal' }, { status: 403 });
     }
     
-    // Cek apakah kategori ada
+    // Cek apakah kategori ada dan berapa banyak marker yang menggunakannya
     const category = await prisma.category.findUnique({
       where: { id },
-      include: { markers: true }
+      include: { 
+        markers: true // Ini akan mengambil MarkerCategory relations
+      }
     });
     
     if (!category) {
       return json({ message: 'Kategori tidak ditemukan' }, { status: 404 });
     }
     
-    // Hapus referensi ke kategori dari marker yang terkait
+    // Hapus relasi marker-category dari junction table terlebih dahulu
     if (category.markers.length > 0) {
-      await prisma.marker.updateMany({
-        where: { categoryId: id },
-        data: { categoryId: null }
+      await prisma.markerCategory.deleteMany({
+        where: { categoryId: id }
       });
     }
     

@@ -37,7 +37,7 @@ model Category {
   updatedAt   DateTime @updatedAt
   createdBy   User     @relation(fields: [userId], references: [id])
   userId      String
-  markers     Marker[] // Hubungan dengan marker
+  markers     MarkerCategory[] // Hubungan many-to-many dengan marker
 }
 
 // Model untuk marker pada peta
@@ -49,13 +49,24 @@ model Marker {
   longitude   Float
   city        String?  // Kota/kabupaten lokasi marker (opsional)
   imageUrl    String?  // URL gambar terkait marker (opsional)
-  url         String?  // URL eksternal terkait marker (opsional)
-  categoryId  String?  // ID kategori (opsional)
-  category    Category? @relation(fields: [categoryId], references: [id]) // Hubungan dengan kategori
+  url         String?  @db.Text // URL eksternal terkait marker (opsional) - menggunakan TEXT untuk JSON
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   User     @relation(fields: [userId], references: [id])
   userId      String
+  categories  MarkerCategory[] // Hubungan many-to-many dengan category
+}
+
+// Model junction table untuk many-to-many relationship antara Marker dan Category
+model MarkerCategory {
+  id         String   @id @default(cuid())
+  markerId   String
+  categoryId String
+  marker     Marker   @relation(fields: [markerId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  
+  @@unique([markerId, categoryId]) // Pastikan tidak ada duplikasi
 }
 
 // Model untuk refresh token

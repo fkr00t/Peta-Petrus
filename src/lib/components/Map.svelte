@@ -4,6 +4,7 @@
   import { browser } from '$app/environment';
   import { page } from '$app/stores';
   import { slide } from 'svelte/transition';
+  import { parseUrlTautan } from '$lib/utils';
   
   interface MarkerData {
     id: string;
@@ -25,6 +26,10 @@
       id: string;
       username: string;
     } | null;
+    allCategories?: {
+      id: string;
+      name: string;
+    }[];
     [key: string]: any;
   }
   
@@ -85,7 +90,14 @@
     const categoryMap = new Map();
     
     markers.forEach(marker => {
-      if (marker.category) {
+      // Ambil dari allCategories (multiple categories system)
+      if (marker.allCategories && marker.allCategories.length > 0) {
+        marker.allCategories.forEach(category => {
+          categoryMap.set(category.id, category);
+        });
+      }
+      // Fallback untuk backward compatibility dengan single category
+      else if (marker.category) {
         categoryMap.set(marker.category.id, marker.category);
       }
     });
@@ -107,10 +119,18 @@
       // Jika tidak ada kategori yang dipilih (reset), tampilkan semua marker
       filteredMarkers = [...markers];
     } else {
-      // Filter marker berdasarkan kategori
-      filteredMarkers = markers.filter(marker => 
-        marker.category && marker.category.id === categoryId
-      );
+      // Filter marker berdasarkan kategori - support multiple categories
+      filteredMarkers = markers.filter(marker => {
+        // Cek di allCategories (multiple categories system)
+        if (marker.allCategories && marker.allCategories.length > 0) {
+          return marker.allCategories.some(category => category.id === categoryId);
+        }
+        // Fallback untuk single category system
+        else if (marker.category) {
+          return marker.category.id === categoryId;
+        }
+        return false;
+      });
     }
     
     // Update markers pada peta
@@ -749,11 +769,11 @@
           <div class="marker-popup-content">
             <div class="marker-popup-header">
               <h3>${truncatedTitle}</h3>
-              ${marker.category ? `<div class="marker-category">${truncateText(marker.category.name, 20)}</div>` : ''}
+              ${marker.city ? `<div class="marker-location">📍 ${marker.city}</div>` : ''}
             </div>
             <div class="marker-popup-body">
               ${truncatedDescription ? `<p>${truncatedDescription}</p>` : ''}
-              <button class="view-details-btn">Lihat Detail</button>
+              <button class="view-details-btn" data-marker-id="${marker.id}">Lihat Detail</button>
             </div>
           </div>
         `, { 
@@ -765,16 +785,60 @@
           minWidth: 180,
         });
       
-      // Tambahkan event listener untuk tombol di popup
+      // Perbaikan event listener dengan multiple checks
+      mapMarker.on('popupopen', () => {
+        console.log('🔍 Popup opened for marker:', marker.id);
+        
+        // Multiple attempts untuk memastikan event listener terpasang
+        const attempts = [0, 50, 100, 200]; // Multiple timing attempts
+        
+        attempts.forEach((delay, index) => {
+          setTimeout(() => {
+            const detailButton = document.querySelector(`[data-marker-id="${marker.id}"]`);
+            if (detailButton && !detailButton.hasAttribute('data-event-attached')) {
+              console.log(`✅ Attaching event listener (attempt ${index + 1}) for marker:`, marker.id);
+              
+              // Mark sebagai sudah di-attach
+              detailButton.setAttribute('data-event-attached', 'true');
+              
+              // Hapus event listener lama jika ada
+              const oldHandler = detailButton.cloneNode(true);
+              detailButton.parentNode?.replaceChild(oldHandler, detailButton);
+              
+              // Tambahkan event listener baru
+              const newButton = document.querySelector(`[data-marker-id="${marker.id}"]`);
+              if (newButton) {
+                newButton.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🎯 Detail button clicked for marker:', marker.id);
+                  openMarkerDetailPopup(marker);
+                }, { once: false }); // Tidak menggunakan once agar bisa diklik berulang
+              }
+            }
+          }, delay);
+        });
+      });
+      
+      // Backup event listener menggunakan event delegation 
       mapMarker.on('popupopen', () => {
         setTimeout(() => {
-          const detailButton = document.querySelector('.view-details-btn');
-          if (detailButton) {
-            detailButton.addEventListener('click', () => {
-              openMarkerDetailPopup(marker);
-            });
-          }
-        }, 100); // Delay kecil untuk memastikan popup sudah dirender
+          // Event delegation sebagai backup
+          document.addEventListener('click', function handleDetailClick(e) {
+            const target = e.target as HTMLElement;
+            if (target && target.classList.contains('view-details-btn')) {
+              const markerId = target.getAttribute('data-marker-id');
+              if (markerId === marker.id) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🎯 Detail button clicked via delegation for marker:', marker.id);
+                openMarkerDetailPopup(marker);
+                // Remove this specific listener setelah digunakan
+                document.removeEventListener('click', handleDetailClick);
+              }
+            }
+          });
+        }, 10);
       });
       
       mapMarkers.push(mapMarker);
@@ -783,6 +847,8 @@
   
   // Function untuk membuka popup detail marker
   function openMarkerDetailPopup(marker: MarkerData) {
+    console.log('🎪 Opening detail popup for marker:', marker.id, marker.title);
+    
     // Tentukan lebar dan tinggi popup
     const width = 500;
     const height = 600;
@@ -797,6 +863,12 @@
       month: 'long',
       year: 'numeric'
     }) : 'Tidak diketahui';
+    
+    // Parse URL tautan untuk mendukung multiple URL
+    let urlTautanList: {url: string, label: string}[] = [];
+    if (marker.url) {
+      urlTautanList = parseUrlTautan(marker.url);
+    }
     
     // Deteksi tema dari aplikasi utama
     const isDarkMode = document.documentElement.classList.contains('dark');
@@ -845,12 +917,22 @@
           
           .category {
             display: inline-block;
-            background: ${isDarkMode ? '#374151' : '#e5e7eb'};
-            color: ${isDarkMode ? '#d1d5db' : '#4b5563'};
-            font-size: 14px;
-            padding: 4px 10px;
-            border-radius: 16px;
-            margin-bottom: 10px;
+            background: ${isDarkMode ? '#1f2937' : '#f8fafc'};
+            color: ${isDarkMode ? '#9ca3af' : '#374151'};
+            font-size: 12px;
+            padding: 2px 8px;
+            border: 1px solid ${isDarkMode ? '#374151' : '#e2e8f0'};
+            border-radius: 3px;
+            margin-bottom: 6px;
+            margin-right: 4px;
+            font-weight: 400;
+          }
+          
+          .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-bottom: 8px;
           }
           
           .location {
@@ -904,13 +986,63 @@
           .link-btn:hover {
             text-decoration: underline;
           }
+          
+          .link-container {
+            margin: 16px 0;
+            padding: 12px;
+            background: ${isDarkMode ? '#1f2937' : '#f8f9fa'};
+            border-radius: 6px;
+            border-left: 3px solid ${isDarkMode ? '#60a5fa' : '#2563eb'};
+          }
+          
+          .link-container h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: ${isDarkMode ? '#d1d5db' : '#374151'};
+            font-weight: 600;
+          }
+          
+          .link-container ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+          }
+          
+          .link-container li {
+            margin-bottom: 4px;
+          }
+          
+          .link-container .link-btn {
+            display: inline-flex;
+            align-items: center;
+            margin: 0;
+            padding: 6px 12px;
+            background: ${isDarkMode ? '#374151' : '#ffffff'};
+            border: 1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'};
+            border-radius: 4px;
+            font-size: 13px;
+            transition: all 0.2s ease;
+          }
+          
+          .link-container .link-btn:hover {
+            background: ${isDarkMode ? '#4b5563' : '#f3f4f6'};
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
         </style>
       </head>
       <body>
         <div class="popup-container">
           <div class="popup-header">
             <h1>${marker.title}</h1>
-            ${marker.category ? `<div class="category">${marker.category.name}</div>` : ''}
+            ${marker.allCategories && marker.allCategories.length > 0 ? `
+              <div class="categories-container">
+                ${marker.allCategories.map(cat => `
+                  <div class="category">${cat.name}</div>
+                `).join('')}
+              </div>
+            ` : marker.category ? `<div class="category">${marker.category.name}</div>` : ''}
             <div class="location">
               ${marker.city ? `<span>📍 ${marker.city}</span>` : ''}
             </div>
@@ -926,10 +1058,15 @@
             </div>
           ` : ''}
           
-          ${marker.url ? `
-            <a href="${marker.url}" target="_blank" rel="noopener noreferrer" class="link-btn">
-              Kunjungi tautan terkait →
-            </a>
+          ${urlTautanList.length > 0 ? `
+            <div class="link-container">
+              <h4>Tautan Terkait:</h4>
+              <ul>
+                ${urlTautanList.map(item => `
+                  <li><a href="${item.url}" target="_blank" rel="noopener noreferrer" class="link-btn">${item.label}</a></li>
+                `).join('')}
+              </ul>
+            </div>
           ` : ''}
           
           <div class="meta-info">
@@ -944,16 +1081,128 @@
       </html>
     `;
     
-    // Buka popup dengan HTML yang sudah dibuat
-    const popup = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,menubar=no,toolbar=no`);
-    
-    if (popup) {
-      popup.document.write(popupContent);
-      popup.document.close();
-    } else {
-      // Jika popup diblokir, berikan pesan ke pengguna
-      alert('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini untuk melihat detail marker.');
+    try {
+      // Coba buka popup window
+      const popup = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,menubar=no,toolbar=no`);
+      
+      if (popup && !popup.closed) {
+        console.log('✅ Popup window opened successfully');
+        popup.document.write(popupContent);
+        popup.document.close();
+        
+        // Focus pada popup window
+        popup.focus();
+      } else {
+        console.warn('⚠️ Popup window was blocked or failed to open');
+        // Fallback: Tampilkan dalam modal di halaman yang sama
+        showInPageModal(marker, popupContent);
+      }
+    } catch (error) {
+      console.error('❌ Error opening popup window:', error);
+      // Fallback: Tampilkan dalam modal di halaman yang sama  
+      showInPageModal(marker, popupContent);
     }
+  }
+  
+  // Fallback function untuk menampilkan detail dalam modal di halaman yang sama
+  function showInPageModal(marker: MarkerData, content: string) {
+    console.log('📱 Showing in-page modal as fallback');
+    
+    // Hapus modal yang ada jika ada
+    const existingModal = document.getElementById('marker-detail-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    // Buat modal container
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = 'marker-detail-modal';
+    modalOverlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    `;
+    
+    // Buat modal content
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+      background: white;
+      border-radius: 8px;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    `;
+    
+    // Buat close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '×';
+    closeButton.style.cssText = `
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      z-index: 1;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    `;
+    
+    closeButton.onmouseover = () => {
+      closeButton.style.backgroundColor = '#f0f0f0';
+    };
+    
+    closeButton.onmouseout = () => {
+      closeButton.style.backgroundColor = 'transparent';
+    };
+    
+    closeButton.onclick = () => {
+      modalOverlay.remove();
+    };
+    
+    // Extract body content dari HTML string
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    const bodyContent = tempDiv.querySelector('body')?.innerHTML || marker.title;
+    
+    modalContent.innerHTML = bodyContent;
+    modalContent.appendChild(closeButton);
+    
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+    
+    // Close modal saat click di luar content
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        modalOverlay.remove();
+      }
+    });
+    
+    // Close modal dengan ESC key
+    document.addEventListener('keydown', function handleEsc(e) {
+      if (e.key === 'Escape') {
+        modalOverlay.remove();
+        document.removeEventListener('keydown', handleEsc);
+      }
+    });
   }
   
   // Reset peta ke tampilan default Pulau Jawa
@@ -1362,6 +1611,7 @@
     padding: 2px 6px;
     border-radius: 10px;
     margin-bottom: 4px;
+    margin-right: 4px;
     font-weight: 500;
     max-width: 100%;
     overflow: hidden;
@@ -1369,6 +1619,15 @@
     white-space: nowrap;
     box-sizing: border-box;
     max-height: 16px;
+  }
+  
+  :global(.marker-popup-content .categories-container) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 4px;
+    max-height: 32px;
+    overflow: hidden;
   }
   
   :global(.leaflet-popup-content p) {
@@ -1728,5 +1987,22 @@
   
   .reset-map-btn .control-icon svg {
     color: #4b5563;
+  }
+  
+  :global(.leaflet-popup-content .marker-location) {
+    display: inline-block;
+    background: #f0f9ff;
+    color: #0369a1;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    font-weight: 500;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+    max-height: 16px;
   }
 </style> 

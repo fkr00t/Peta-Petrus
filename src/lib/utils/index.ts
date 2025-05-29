@@ -216,4 +216,96 @@ export { sanitizeString };
 export function isValidUrl(url: string): boolean {
   const result = validateUrl(url);
   return result.valid;
+}
+
+/**
+ * Parse URL tautan dari format database ke array
+ * @param urlString String URL dari database (bisa JSON atau comma-separated)
+ * @returns Array URL tautan dengan label
+ */
+export function parseUrlTautan(urlString: string | null): {url: string, label: string}[] {
+  if (!urlString) return [];
+  
+  try {
+    // Coba parse sebagai JSON array (format baru)
+    const urlArray = JSON.parse(urlString);
+    if (Array.isArray(urlArray)) {
+      return urlArray.map((item, index) => ({
+        url: typeof item === 'object' ? item.url : item,
+        label: typeof item === 'object' ? item.label || `Tautan ${index + 1}` : `Tautan ${index + 1}`
+      }));
+    } else {
+      // Fallback ke format lama
+      return [{ url: urlString, label: 'Tautan Terkait' }];
+    }
+  } catch {
+    // Jika parsing JSON gagal, coba format koma (format lama)
+    if (urlString.includes(',')) {
+      const urls = urlString.split(',');
+      return urls.map((url, index) => ({
+        url: url.trim(),
+        label: `Tautan ${index + 1}`
+      }));
+    } else {
+      // Single URL
+      return [{ url: urlString, label: 'Tautan Terkait' }];
+    }
+  }
+}
+
+/**
+ * Decode HTML entities
+ * @param str String dengan HTML entities
+ * @returns String yang sudah di-decode
+ */
+function decodeHtmlEntities(str: string): string {
+  if (typeof str !== 'string') return str;
+  
+  return str
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+/**
+ * Format array URL tautan ke string untuk disimpan di database
+ * @param urlTautanArray Array URL tautan dengan label
+ * @returns String yang siap disimpan ke database
+ */
+export function formatUrlTautan(urlTautanArray: {url: string, label: string}[]): string | null {
+  if (!urlTautanArray || urlTautanArray.length === 0) return null;
+  
+  // Filter hanya URL yang tidak kosong
+  const validUrls = urlTautanArray.filter(item => item.url.trim());
+  
+  if (validUrls.length === 0) return null;
+  
+  // Bersihkan dan sanitasi setiap item
+  const cleanUrls = validUrls.map(item => ({
+    url: decodeHtmlEntities(item.url.trim()),
+    label: decodeHtmlEntities(item.label.trim()) || 'Tautan'
+  }));
+  
+  // Jika ada label yang tidak kosong, simpan sebagai JSON
+  if (cleanUrls.some(url => url.label && url.label.trim())) {
+    try {
+      const jsonString = JSON.stringify(cleanUrls);
+      // Batasi panjang untuk keamanan (max 1000 chars untuk TEXT field)
+      if (jsonString.length > 1000) {
+        console.warn('URL tautan terlalu panjang, akan dipotong');
+        // Fallback ke format sederhana jika terlalu panjang
+        return cleanUrls.map(url => url.url).join(',').substring(0, 500);
+      }
+      return jsonString;
+    } catch (error) {
+      console.error('Error formatting URL tautan as JSON:', error);
+      // Fallback ke format comma-separated
+      return cleanUrls.map(url => url.url).join(',');
+    }
+  } else {
+    // Jika tidak ada label, simpan sebagai comma-separated (backward compatible)
+    return cleanUrls.map(url => url.url).join(',');
+  }
 } 

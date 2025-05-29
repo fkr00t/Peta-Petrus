@@ -3,6 +3,7 @@
     import MarkerForm from '$lib/components/MarkerForm.svelte';
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
   
     interface Category {
       id: string;
@@ -175,8 +176,12 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-CSRF-Token': $page.data.csrfToken || ''
           },
-          body: JSON.stringify(markerData),
+          body: JSON.stringify({
+            ...markerData,
+            csrf: $page.data.csrfToken
+          }),
         });
   
         if (response.ok) {

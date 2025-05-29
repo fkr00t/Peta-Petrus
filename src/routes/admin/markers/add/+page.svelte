@@ -4,7 +4,7 @@
   import { page } from '$app/stores';
   import Map from '$lib/components/Map.svelte';
   import MarkerForm from '$lib/components/MarkerForm.svelte';
-  import { sanitizeFormData, isValidUrl, sanitizeString } from '$lib/utils';
+  import { sanitizeFormData, isValidUrl, sanitizeString, formatUrlTautan } from '$lib/utils';
   
   // Ambil data
   let user: any;
@@ -26,6 +26,10 @@
   let notificationType = $state('success'); // 'success', 'error', 'info'
   let notificationTimeout: number | null = null;
   
+  // State untuk URL tautan dinamis
+  let urlTautan = $state([{ url: '', label: '' }]); // Array untuk multiple URL
+  let isAddingUrl = $state(false);
+  
   // Fungsi untuk menampilkan notifikasi
   function showToast(message: string, type: 'success' | 'error' | 'info' = 'success', duration: number = 3000) {
     // Clear existing timeout if any
@@ -41,6 +45,24 @@
     notificationTimeout = window.setTimeout(() => {
       showNotification = false;
     }, duration);
+  }
+  
+  // Fungsi untuk menambah URL tautan baru
+  function addUrlTautan() {
+    urlTautan = [...urlTautan, { url: '', label: '' }];
+    isAddingUrl = false;
+  }
+  
+  // Fungsi untuk menghapus URL tautan
+  function removeUrlTautan(index: number) {
+    if (urlTautan.length > 1) {
+      urlTautan = urlTautan.filter((_, i) => i !== index);
+    }
+  }
+  
+  // Fungsi untuk toggle form tambah URL
+  function toggleAddUrl() {
+    isAddingUrl = !isAddingUrl;
   }
   
   // Redirect jika bukan admin
@@ -100,6 +122,9 @@
   // Submit marker baru
   async function handleSubmitMarker(formData: FormData) {
     try {
+      console.log('📍 Mulai submit marker...');
+      console.log('FormData entries:', Array.from(formData.entries()));
+      
       // Konversi FormData ke object biasa dan sanitasi data
       const formDataObj: Record<string, any> = {};
       formData.forEach((value, key) => {
@@ -111,11 +136,28 @@
         }
       });
       
-      // Validasi URL tautan jika ada
-      if (formDataObj.url && !isValidUrl(formDataObj.url)) {
-        showToast('URL tautan tidak valid', 'error');
-        return;
+      console.log('🔍 FormData Object:', formDataObj);
+      
+      // Validasi dan sanitasi URL tautan
+      const validUrlTautan: {url: string, label: string}[] = [];
+      for (const urlItem of urlTautan) {
+        if (urlItem.url.trim()) {
+          if (!isValidUrl(urlItem.url)) {
+            showToast(`URL "${urlItem.url}" tidak valid`, 'error');
+            return;
+          }
+          validUrlTautan.push({
+            url: sanitizeString(urlItem.url.trim()) || '',
+            label: sanitizeString(urlItem.label.trim()) || 'Tautan'
+          });
+        }
       }
+      
+      console.log('✅ Valid URL Tautan:', validUrlTautan);
+      
+      // Format URL menggunakan fungsi utilitas
+      const formattedUrl = formatUrlTautan(validUrlTautan);
+      console.log('🔗 Formatted URL:', formattedUrl);
       
       // Sanitasi data form dengan DOMPurify
       const sanitizedData = sanitizeFormData({
@@ -125,10 +167,14 @@
         longitude: parseFloat(formDataObj.longitude as string),
         city: formDataObj.city || null,
         imageUrl: formDataObj.imageUrl || null,
-        url: formDataObj.url || null,
-        categoryId: formDataObj.categoryId,
+        // Convert multiple URL tautan ke format yang kompatibel dengan backend
+        url: formattedUrl,
+        // Parse categoryIds dari FormData (sudah dalam format JSON string dari MarkerForm)
+        categoryIds: formDataObj.categoryIds ? JSON.parse(formDataObj.categoryIds) : [],
         csrf: $page.data.csrfToken
       });
+      
+      console.log('🧹 Sanitized Data:', sanitizedData);
       
       const response = await fetch('/api/markers', {
         method: 'POST',
@@ -139,7 +185,12 @@
         body: JSON.stringify(sanitizedData),
       });
   
+      console.log('📡 Response status:', response.status);
+      
       if (response.ok) {
+        const responseData = await response.json();
+        console.log('✅ Response data:', responseData);
+        
         // Tampilkan notifikasi berhasil dengan toast
         showToast('Marker berhasil ditambahkan!', 'success');
         
@@ -150,10 +201,12 @@
         }, 1500);
       } else {
         const errorData = await response.json();
+        console.error('❌ Error response:', errorData);
         throw new Error(errorData.message || 'Gagal menambahkan marker');
       }
     } catch (err: any) {
-      console.error('Error submitting marker:', err);
+      console.error('💥 Error submitting marker:', err);
+      console.error('Stack trace:', err.stack);
       // Tampilkan notifikasi error dengan toast
       showToast(`Gagal menambahkan marker: ${err.message}`, 'error');
     }
@@ -165,6 +218,10 @@
   function resetForm() {
     newMarkerLat = null;
     newMarkerLng = null;
+    
+    // Reset URL tautan ke state awal
+    urlTautan = [{ url: '', label: '' }];
+    isAddingUrl = false;
     
     // Hapus marker sementara jika ada
     if (mapComponent && typeof mapComponent.clearTempMarker === 'function') {
@@ -300,6 +357,11 @@
       onSubmit={handleSubmitMarker}
       onCancel={resetForm}
       mapComponent={mapComponent}
+      urlTautan={urlTautan}
+      isAddingUrl={isAddingUrl}
+      addUrlTautan={addUrlTautan}
+      removeUrlTautan={removeUrlTautan}
+      toggleAddUrl={toggleAddUrl}
     />
   </div>
 </div> 

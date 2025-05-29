@@ -21,6 +21,11 @@ export async function GET({ params, locals }: RequestEvent) {
             id: true,
             username: true
           }
+        },
+        categories: {
+          include: {
+            category: true
+          }
         }
       }
     });
@@ -50,7 +55,7 @@ export async function PUT({ request, params, locals, cookies }: RequestEvent) {
     }
     
     const requestData = await request.json();
-    const { title, description, latitude, longitude, city, categoryId, imageUrl, url, csrf } = requestData;
+    const { title, description, latitude, longitude, city, categoryIds, imageUrl, url, csrf } = requestData;
     
     // Validasi CSRF token
     const csrfHeader = request.headers.get('X-CSRF-Token');
@@ -65,6 +70,11 @@ export async function PUT({ request, params, locals, cookies }: RequestEvent) {
       return json({ message: 'Judul dan koordinat harus diisi' }, { status: 400 });
     }
     
+    // Validasi categories
+    if (!categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+      return json({ message: 'Minimal satu kategori harus dipilih' }, { status: 400 });
+    }
+    
     // Cek apakah marker ada
     const existingMarker = await prisma.marker.findUnique({
       where: { id: params.id }
@@ -74,20 +84,66 @@ export async function PUT({ request, params, locals, cookies }: RequestEvent) {
       return json({ message: 'Marker tidak ditemukan' }, { status: 404 });
     }
     
-    // Update marker
-    const updatedMarker = await prisma.marker.update({
-      where: { id: params.id },
-      data: {
-        title,
-        description,
-        latitude,
-        longitude,
-        city,
-        categoryId,
-        imageUrl,
-        url,
-        updatedAt: new Date()
+    // Cek apakah semua kategori yang dipilih exists
+    const existingCategories = await prisma.category.findMany({
+      where: {
+        id: { in: categoryIds }
       }
+    });
+    
+    if (existingCategories.length !== categoryIds.length) {
+      return json({ message: 'Beberapa kategori yang dipilih tidak valid' }, { status: 400 });
+    }
+    
+    // Update marker dengan transaction
+    const updatedMarker = await prisma.$transaction(async (tx) => {
+      // Update marker data
+      const marker = await tx.marker.update({
+        where: { id: params.id },
+        data: {
+          title,
+          description,
+          latitude,
+          longitude,
+          city,
+          imageUrl,
+          url,
+          updatedAt: new Date()
+        }
+      });
+      
+      // Hapus relasi kategori yang lama
+      await tx.markerCategory.deleteMany({
+        where: { markerId: params.id }
+      });
+      
+      // Tambahkan relasi kategori yang baru
+      const categoryRelations = categoryIds.map((categoryId: string) => ({
+        markerId: params.id!,
+        categoryId: categoryId
+      }));
+      
+      await tx.markerCategory.createMany({
+        data: categoryRelations
+      });
+      
+      // Ambil marker dengan relasi categories yang baru
+      return await tx.marker.findUnique({
+        where: { id: params.id },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              username: true
+            }
+          },
+          categories: {
+            include: {
+              category: true
+            }
+          }
+        }
+      });
     });
     
     return json(updatedMarker);
@@ -137,9 +193,17 @@ export async function DELETE({ params, locals, request, cookies }: RequestEvent)
       return json({ message: 'Marker tidak ditemukan' }, { status: 404 });
     }
     
-    // Hapus marker
-    await prisma.marker.delete({
-      where: { id: params.id }
+    // Hapus marker dengan transaction untuk menghapus relasi categories juga
+    await prisma.$transaction(async (tx) => {
+      // Hapus relasi categories terlebih dahulu
+      await tx.markerCategory.deleteMany({
+        where: { markerId: params.id }
+      });
+      
+      // Kemudian hapus marker
+      await tx.marker.delete({
+        where: { id: params.id }
+      });
     });
     
     // Return 204 No Content untuk success delete

@@ -173,6 +173,11 @@ export const handle: Handle = async ({ event, resolve }) => {
     throw redirect(302, '/login');
   }
   
+  // Redirect untuk /admin/security ke path baru
+  if (event.url.pathname === '/admin/security') {
+    throw redirect(302, '/admin/settings/security');
+  }
+  
   // Periksa apakah ini adalah permintaan untuk menyegarkan token
   const isRefreshRequest = event.url.pathname === '/api/auth/refresh' && event.request.method === 'POST';
   
