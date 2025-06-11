@@ -11,7 +11,7 @@
   let isAdmin = false;
   
   // Referensi ke komponen map
-  let mapComponent: any;
+  let mapComponent: any = $state(null);
   
   // State untuk form marker baru
   let newMarkerLat: number | null = $state(null);  // Koordinat default kosong

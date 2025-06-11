@@ -347,11 +347,12 @@
           
           {#if failedAttempts >= 3}
             <div class="mt-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verifikasi Keamanan</label>
+              <label for="turnstile-widget" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verifikasi Keamanan</label>
               <div class="text-xs text-amber-600 dark:text-amber-400 mb-2">
                 Terlalu banyak percobaan gagal. Harap selesaikan verifikasi keamanan berikut.
               </div>
               <Turnstile 
+                id="turnstile-widget"
                 onVerify={handleCaptchaVerify} 
                 onError={handleCaptchaError} 
                 onExpire={handleCaptchaExpire}
@@ -412,7 +413,4 @@
   .hover\:bg-primary-700:hover { background-color: var(--color-primary-700); }
   .focus\:ring-primary-500:focus { --tw-ring-color: var(--color-primary-500); }
   .focus\:ring-primary-400:focus { --tw-ring-color: var(--color-primary-400); }
-  .text-primary-600 { color: var(--color-primary-600); }
-  .dark\:text-primary-400 { color: var(--color-primary-400); }
-  .dark\:hover\:text-primary-300:hover { color: var(--color-primary-300); }
 </style>

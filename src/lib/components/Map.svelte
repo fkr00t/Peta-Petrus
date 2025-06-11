@@ -1263,7 +1263,7 @@
     {#if !hideFilterButton}
       <button 
         class="control-btn filter-toggle-btn" 
-        on:click|stopPropagation={toggleFilterPanel} 
+        onclick={(e) => { e.stopPropagation(); toggleFilterPanel(); }} 
         aria-label="Filter lokasi berdasarkan kategori" 
         title="Filter lokasi"
       >
@@ -1282,7 +1282,7 @@
     {#if !hideControls}
       <button 
         class="control-btn search-toggle-btn" 
-        on:click|stopPropagation={toggleSearchPanel} 
+        onclick={(e) => { e.stopPropagation(); toggleSearchPanel(); }} 
         aria-label="Cari lokasi" 
         title="Cari lokasi"
       >
@@ -1297,7 +1297,7 @@
       <!-- Reset Button -->
       <button 
         class="control-btn reset-map-btn" 
-        on:click|stopPropagation={resetMapView} 
+        onclick={(e) => { e.stopPropagation(); resetMapView(); }} 
         aria-label="Reset tampilan peta" 
         title="Reset peta"
       >
@@ -1315,10 +1315,18 @@
   
   <!-- Filter Panel -->
   {#if showFilterPanel}
-    <div class="control-panel filter-panel {controlsPosition === 'middle' ? 'position-middle' : ''}" transition:slide={{ duration: 200 }} on:click|stopPropagation>
+    <div 
+      class="control-panel filter-panel {controlsPosition === 'middle' ? 'position-middle' : ''}" 
+      transition:slide={{ duration: 200 }} 
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.key === 'Escape' && toggleFilterPanel()}
+      role="dialog"
+      aria-label="Filter lokasi berdasarkan kategori"
+      tabindex="0"
+    >
       <div class="panel-header">
         <span>Filter Berdasarkan Kategori</span>
-        <button class="close-panel-btn" on:click|stopPropagation={toggleFilterPanel}>×</button>
+        <button class="close-panel-btn" onclick={(e) => { e.stopPropagation(); toggleFilterPanel(); }}>×</button>
       </div>
       
       <div class="panel-content">
@@ -1327,7 +1335,7 @@
             {#each availableCategories as category}
               <button 
                 class="category-btn {selectedCategoryId === category.id ? 'active' : ''}"
-                on:click|stopPropagation={() => filterMarkersByCategory(category.id)}
+                onclick={(e) => { e.stopPropagation(); filterMarkersByCategory(category.id); }}
                 title={category.name}
               >
                 {truncateText(category.name, 30)}
@@ -1335,7 +1343,7 @@
             {/each}
           </div>
           
-          <button class="reset-filter-btn" on:click|stopPropagation={resetFilter}>
+          <button class="reset-filter-btn" onclick={(e) => { e.stopPropagation(); resetFilter(); }}>
             Reset Filter
           </button>
         {:else}
@@ -1347,10 +1355,18 @@
   
   <!-- Search Panel -->
   {#if showSearchPanel}
-    <div class="control-panel search-panel {controlsPosition === 'middle' ? 'position-middle' : ''}" transition:slide={{ duration: 200 }} on:click|stopPropagation>
+    <div 
+      class="control-panel search-panel {controlsPosition === 'middle' ? 'position-middle' : ''}" 
+      transition:slide={{ duration: 200 }} 
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.key === 'Escape' && toggleSearchPanel()}
+      role="dialog"
+      aria-label="Pencarian lokasi"
+      tabindex="0"
+    >
       <div class="panel-header">
         <span>Cari Berdasarkan Lokasi</span>
-        <button class="close-panel-btn" on:click|stopPropagation={toggleSearchPanel}>×</button>
+        <button class="close-panel-btn" onclick={(e) => { e.stopPropagation(); toggleSearchPanel(); }}>×</button>
       </div>
       
       <div class="panel-content">
@@ -1361,13 +1377,13 @@
               bind:value={searchQuery}
               placeholder="Masukkan nama kota, kabupaten, atau alamat"
               class="search-input"
-              on:click|stopPropagation
+              onclick={(e) => e.stopPropagation()}
             />
           </div>
           
           <button 
             class="search-btn" 
-            on:click|stopPropagation={searchLocation}
+            onclick={(e) => { e.stopPropagation(); searchLocation(); }}
             disabled={isSearching}
           >
             {#if isSearching}
@@ -1708,10 +1724,6 @@
     justify-content: center;
   }
   
-  .control-text {
-    display: none;
-  }
-  
   .control-active-badge {
     position: absolute;
     top: -2px;
@@ -1963,16 +1975,9 @@
   }
   
   /* Existing styles for filter panel are now applied to both panels */
-  .filter-control {
-    display: none;
-  }
   
   .filter-toggle-btn {
     /* Specific styles for filter button can be kept here */
-  }
-  
-  .search-toggle-btn {
-    /* Specific styles for search button */
   }
   
   .reset-map-btn {

@@ -304,7 +304,7 @@
         <!-- Tombol tutup di pojok kanan -->
         <button 
           class="text-amber-600 hover:text-amber-800 dark:text-gray-300 dark:hover:text-white transition-colors flex-shrink-0 ml-2" 
-          on:click={closeInfoBanner}
+          onclick={closeInfoBanner}
           aria-label="Tutup informasi"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -336,7 +336,7 @@
     {#if showToast}
       <div class="fixed top-4 right-4 z-50 fade-in">
         <div class="{toastType === 'success' ? 'bg-green-600' : toastType === 'error' ? 'bg-red-600' : 'bg-blue-600'} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
-          <button on:click={() => showToast = false} class="text-white hover:text-gray-200" aria-label="Tutup notifikasi">
+          <button onclick={() => showToast = false} class="text-white hover:text-gray-200" aria-label="Tutup notifikasi">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
@@ -366,8 +366,8 @@
       <!-- Overlay untuk background saat form terbuka -->
       <div 
         class="overlay" 
-        on:click={cancelAddMarker} 
-        on:keydown={(e) => e.key === 'Escape' && cancelAddMarker()}
+        onclick={cancelAddMarker} 
+        onkeydown={(e) => e.key === 'Escape' && cancelAddMarker()}
         role="button"
         tabindex="0"
         aria-label="Tutup form marker"

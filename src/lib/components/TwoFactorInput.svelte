@@ -1,6 +1,6 @@
 <!-- Komponen untuk input kode autentikasi dua faktor -->
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   
   // Props
   export let error = '';
@@ -19,6 +19,16 @@
     useBackup: void;
     useCode: void;
   }>();
+  
+  // Menggunakan onMount untuk fokus secara manual saat komponen dimuat
+  onMount(() => {
+    if (autoFocus && inputRef) {
+      // Gunakan timeout untuk memastikan DOM sudah sepenuhnya dimuat
+      setTimeout(() => {
+        inputRef.focus();
+      }, 100);
+    }
+  });
   
   // Functions
   function handleSubmit() {
@@ -80,7 +90,6 @@
         class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 transition-all duration-200"
         class:border-red-500={error}
         class:dark:border-red-500={error}
-        autofocus={autoFocus}
       />
     </div>
     

@@ -262,7 +262,14 @@
 
 <!-- Mobile Menu Sidebar (untuk Admin) -->
 {#if showMobileMenu && user && user.role === 'ADMIN'}
-  <div class="fixed inset-0 bg-black bg-opacity-50 z-50" onclick={toggleMobileMenu}></div>
+  <div 
+    class="fixed inset-0 bg-black bg-opacity-50 z-50" 
+    onclick={toggleMobileMenu} 
+    onkeydown={(e) => e.key === 'Escape' && toggleMobileMenu()}
+    role="button"
+    tabindex="0"
+    aria-label="Tutup menu mobile"
+  ></div>
   <div 
     id="mobileMenu"
     class="fixed top-0 left-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-xl z-50 transform transition-transform {showMobileMenu ? 'translate-x-0' : '-translate-x-full'}"

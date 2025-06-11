@@ -6,7 +6,7 @@
   export let latitude: number | null = null;
   export let longitude: number | null = null;
   export let onSubmit: (formData: FormData) => Promise<void>;
-  export let onCancel: () => void;
+  export const onCancel: () => void = () => {};
   export let mapComponent: any = null; // Untuk referensi komponen peta
   
   // Props untuk multiple URL tautan dari parent component
@@ -649,6 +649,7 @@
                         onclick={() => removeUrlTautan && removeUrlTautan(index)}
                         class="px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-md border border-red-200 dark:border-red-700 transition-colors duration-200 flex items-center"
                         title="Hapus URL ini"
+                        aria-label="Hapus URL ini"
                       >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -665,10 +666,11 @@
           {#if isAddingUrl}
             <div class="mt-3 p-3 border border-emerald-200 dark:border-emerald-700 rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
               <div class="mb-3">
-                <label class="block text-sm font-medium text-emerald-700 dark:text-emerald-300 mb-1">Tambah URL Tautan Baru</label>
+                <label for="add-url-button" class="block text-sm font-medium text-emerald-700 dark:text-emerald-300 mb-1">Tambah URL Tautan Baru</label>
                 <p class="text-xs text-emerald-600 dark:text-emerald-400 mb-2">Anda dapat menambahkan beberapa URL tautan untuk setiap marker</p>
               </div>
               <button
+                id="add-url-button"
                 type="button"
                 onclick={() => addUrlTautan && addUrlTautan()}
                 class="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-md shadow-sm transition-colors duration-200"
@@ -702,6 +704,7 @@
                   onclick={clearImageSelection}
                   class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
                   title="Hapus gambar"
+                  aria-label="Hapus gambar"
                 >
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
