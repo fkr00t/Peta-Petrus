@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Model untuk otentikasi pengguna
+model User {
+  id                String         @id @default(cuid())
+  username          String         @unique
+  password          String
+  role              Role           @default(USER)
+  twoFactorEnabled  Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  markers           Marker[]
+  categories        Category[]     // Hubungan dengan kategori (user yang membuat)
+  refreshTokens     RefreshToken[] // Hubungan dengan refresh token
+  twoFactorSecret   TwoFactorSecret?
+
+  @@map("user")
+}
+
+// Model untuk kategori marker
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation(fields: [userId], references: [id])
+  userId      String
+  markers     MarkerCategory[] // Hubungan many-to-many dengan marker
+
+  @@map("category")
+}
+
+// Model untuk marker pada peta
+model Marker {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  latitude    Float
+  longitude   Float
+  city        String?  // Kota/kabupaten lokasi marker (opsional)
+  imageUrl    String?  // URL gambar terkait marker (opsional)
+  url         String?  @db.Text // URL eksternal terkait marker (opsional) - menggunakan TEXT untuk JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation(fields: [userId], references: [id])
+  userId      String
+  categories  MarkerCategory[] // Hubungan many-to-many dengan category
+
+   @@map("marker")
+}
+
+// Model junction table untuk many-to-many relationship antara Marker dan Category
+model MarkerCategory {
+  id         String   @id @default(cuid())
+  markerId   String
+  categoryId String
+  marker     Marker   @relation(fields: [markerId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  
+  @@unique([markerId, categoryId]) // Pastikan tidak ada duplikasi
+  @@map("markercategory")
+}
+
+// Model untuk refresh token
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+  userAgent String?  // Info tentang browser/device
+  ipAddress String?  // Info tentang IP address
+
+  @@map("refreshtoken")
+}
+
+// Model untuk menyimpan rahasia 2FA
+model TwoFactorSecret {
+  id          String   @id @default(cuid())
+  secret      String
+  verified    Boolean  @default(false)
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  backupCodes String?  // Backup codes dalam format JSON
+
+  @@map("twofactorsecret")
+}
+
+// Enum untuk role pengguna
+enum Role {
+  USER
+  ADMIN
+}
